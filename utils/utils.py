@@ -76,24 +76,61 @@ def process_pointcloud(point_cloud, cfg):
 #-- util function to load calib matrices
 CAM = 2
 def load_calib(calib_dir):
-    # P2 * R0_rect * Tr_velo_to_cam * y
-    lines = open(calib_dir).readlines()
-    lines = [ line.split()[1:] for line in lines ][:-1]
-    #
-    P = np.array(lines[CAM]).reshape(3,4)
-    P = np.concatenate( (  P, np.array( [[0,0,0,0]] )  ), 0  )
-    #
-    Tr_velo_to_cam = np.array(lines[5]).reshape(3,4)
-    Tr_velo_to_cam = np.concatenate(  [ Tr_velo_to_cam, np.array([0,0,0,1]).reshape(1,4)  ]  , 0     )
-    #
-    R_cam_to_rect = np.eye(4)
-    R_cam_to_rect[:3,:3] = np.array(lines[4][:9]).reshape(3,3)
-    #
-    P = P.astype('float32')
-    Tr_velo_to_cam = Tr_velo_to_cam.astype('float32')
-    R_cam_to_rect = R_cam_to_rect.astype('float32')
-    return P, Tr_velo_to_cam, R_cam_to_rect
+    # # P2 * R0_rect * Tr_velo_to_cam * y
+    # lines = open(calib_dir).readlines()
+    # lines = [ line.split()[1:] for line in lines ][:-1]
+    # #
+    # P = np.array(lines[CAM]).reshape(3,4)
+    # P = np.concatenate( (  P, np.array( [[0,0,0,0]] )  ), 0  )
+    # #
+    # Tr_velo_to_cam = np.array(lines[5]).reshape(3,4)
+    # Tr_velo_to_cam = np.concatenate(  [ Tr_velo_to_cam, np.array([0,0,0,1]).reshape(1,4)  ]  , 0     )
+    # #
+    # R_cam_to_rect = np.eye(4)
+    # R_cam_to_rect[:3,:3] = np.array(lines[4][:9]).reshape(3,3)
+    # #
+    # P = P.astype('float32')
+    # Tr_velo_to_cam = Tr_velo_to_cam.astype('float32')
+    # R_cam_to_rect = R_cam_to_rect.astype('float32')
+    # return P, Tr_velo_to_cam, R_cam_to_rect
+    with open(calib_dir, mode='r') as f:
+        data = json.load(f)
+    T_fromLidar = np.array(data['sensors'][1]['calib_data']['T_to_ref_COS'])
+    T_fromCamera = np.array(data['sensors'][2]['calib_data']['T_to_ref_COS'])
+    K = np.array(data['sensors'][2]['calib_data']['K'])
 
+    T_toLidar = inv_trans(T_fromLidar)
+    T_toCamera = inv_trans(T_fromCamera)
+    return T_toLidar, T_toCamera, K
+
+def load_label(label_dir):
+    with open(label_dir, mode='r') as f:
+        data = json.load(f)
+    objects_info = data['objects']
+    objects = []
+    classids = []
+
+    for p in objects_info:
+        center = np.array(p['center3d'])
+        dimension = np.array(p['dimension3d'])
+        w = dimension[0]
+        l = dimension[1]
+        h = dimension[2]
+        orientation = np.array(p['orientation_quat'])
+        classids.append(p['classname'])
+
+        x_corners = [w / 2, -w / 2, -w / 2, w / 2, w / 2, -w / 2, -w / 2, w / 2]
+        y_corners = [l / 2, l / 2, -l / 2, -l / 2, l / 2, l / 2, -l / 2, -l / 2]
+        z_corners = [h / 2, h / 2, h / 2, h / 2, -h / 2, -h / 2, -h / 2, -h / 2]
+        # rotate and translate 3d bounding box
+        R = quat_to_rotation(orientation)
+        bbox = np.vstack([x_corners, y_corners, z_corners])
+        bbox = np.dot(R, bbox)
+        bbox = bbox + center[:, np.newaxis]
+
+        bbox = np.transpose(bbox)
+        objects.append(bbox)
+    return objects,classids
 
 def lidar_to_bird_view(x, y, factor=1):
     # using the cfg.INPUT_XXX

@@ -61,7 +61,7 @@ def main():
   params = vars(args)
   params["mode"] = "train"
   cfg["DATA_DIR"] = params["data_root_dir"]
-  cfg["CALIB_DIR"] = os.path.join(cfg["DATA_DIR"], "training/calib")
+  cfg["CALIB_DIR"] = os.path.join(cfg["DATA_DIR"], "validation/calibration")
 
   # Strategy Management         #####################################################
   logical_gpus = tf.config.experimental.list_logical_devices('GPU')

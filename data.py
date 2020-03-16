@@ -27,18 +27,18 @@ class Data_helper:
     self.mode = mode
     data_d = "training" if mode == "train" else "testing" if mode =="test" else "validation"
     if mode != "test":
-      label_tags = [os.path.basename(a).split(".")[0] for a in glob.glob(os.path.join(cfg.DATA_DIR, data_d, "label_2/*.txt"))]
-    img_tags = [os.path.basename(a).split(".")[0] for a in glob.glob(os.path.join(cfg.DATA_DIR, data_d, "image_2/*.png"))]
-    lidar_tags = [os.path.basename(a).split(".")[0] for a in glob.glob(os.path.join(cfg.DATA_DIR, data_d, "velodyne/*.bin"))]
+      label_tags = [os.path.basename(a).split(".")[0] for a in glob.glob(os.path.join(cfg.DATA_DIR, data_d, "groundtruth_obj3d/*.json"))]
+    img_tags = [os.path.basename(a).split(".")[0] for a in glob.glob(os.path.join(cfg.DATA_DIR, data_d, "camera_front/*.jpg"))]
+    lidar_tags = [os.path.basename(a).split(".")[0] for a in glob.glob(os.path.join(cfg.DATA_DIR, data_d, "radar_6455/*.bin"))]
 
     if mode != "test":
-      assert label_tags and img_tags and lidar_tags, "One of the three (label_2, image_2, velodyne) folders is empty, Data folder must not be empty"
+      assert label_tags and img_tags and lidar_tags, "One of the three (label, camera, lidar) folders is empty, Data folder must not be empty"
       assert not set(label_tags).symmetric_difference(set(img_tags)) and not set(img_tags).symmetric_difference(set(lidar_tags)),\
-      "Must have equivalent tags in image_2, label_2 and velodyne dirs, check those files"
+      "Must have equivalent tags in label, camera, lidar dirs, check those files"
     else:
-      assert  img_tags and lidar_tags, "One of the three (image_2, velodyne) folders is empty, Data folder must not be empty"
+      assert  img_tags and lidar_tags, "One of the two (camera, lidar) folders is empty, Data folder must not be empty"
       assert  not set(img_tags).symmetric_difference(set(lidar_tags)),\
-      "Must have equivalent tags in image_2, velodyne dirs, check those files"
+      "Must have equivalent tags in camera, lidar dirs, check those files"
     
     self.tags = lidar_tags
     self.num_examples = len(lidar_tags)
@@ -64,9 +64,9 @@ class Data_helper:
 
   def fill_examples_queue(self, cfg, mode, is_aug_data=False):
     data_d = "training" if mode == "train" else "testing" if mode =="test" else "validation"
-    img_dir = "{}/{}/image_2".format(cfg.DATA_DIR, data_d)
-    labels_dir = "{}/{}/label_2".format(cfg.DATA_DIR, data_d)
-    pc_dir = "{}/{}/velodyne".format(cfg.DATA_DIR, data_d)
+    img_dir = "{}/{}/camera_front".format(cfg.DATA_DIR, data_d)
+    labels_dir = "{}/{}/groundtruth_obj3d".format(cfg.DATA_DIR, data_d)
+    pc_dir = "{}/{}/radar_6455".format(cfg.DATA_DIR, data_d)
     
     if mode in ["train", "sample_test"]:
       random.shuffle(self.tags)
@@ -85,17 +85,19 @@ class Data_helper:
           dic["labels"] = []
         elif mode == "sample_test" or mode== "eval":
           dic["lidar"] = pc
-          dic["labels"] = np.array([line.strip() for line in open("%s/%06d.txt" % (labels_dir, int(index)) , 'r').readlines()])
+          #dic["labels"] = np.array([line.strip() for line in open("%s/%06d.txt" % (labels_dir, int(index)) , 'r').readlines()])
+          dic["labels"] = load_label("%s/%06d.json" % (labels_dir,int(index)))
         else:
           dic["lidar"] = 0
-          dic["labels"] = np.array([line.strip() for line in open("%s/%06d.txt" % (labels_dir, int(index)) , 'r').readlines()])
+          #dic["labels"] = np.array([line.strip() for line in open("%s/%06d.txt" % (labels_dir, int(index)) , 'r').readlines()])
+          dic["labels"] = load_label("%s/%06d.json" % (labels_dir,int(index)))
         dic["num_points"] = len(pc)
 
         if mode == "train":
           dic["img"] = 0
         else:
-          img = tf.io.read_file("%s/%06d.png" % (img_dir, int(index)))
-          img = tf.image.decode_png(img, channels=cfg.IMG_CHANNEL)
+          img = tf.io.read_file("%s/%06d.jpg" % (img_dir, int(index)))
+          img = tf.image.decode_jpeg(img, channels=cfg.IMG_CHANNEL)
           img = tf.image.convert_image_dtype(img, tf.float32)
           dic["img"] = tf.image.resize(img, [cfg.IMG_HEIGHT, cfg.IMG_WIDTH])
 
