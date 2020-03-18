@@ -12,9 +12,10 @@ def aug_data(tag, object_dir):
                                              #'image_2', tag + '.png')), (cfg.IMAGE_WIDTH, cfg.IMAGE_HEIGHT))
     #rgb = cv2.imread( os.path.join(object_dir,'image_2', tag + '.png')  )
     lidar = np.fromfile(os.path.join(object_dir,
-                                     'velodyne', tag + '.bin'), dtype=np.float32).reshape(-1, 4)
-    label = np.array([line for line in open(os.path.join(
-        object_dir, 'label_2', tag + '.txt'), 'r').readlines()])  # (N')
+                                     'radar_6455', tag + '.bin'), dtype=np.float32).reshape(-1, 4)
+    # label = np.array([line for line in open(os.path.join(
+    #     object_dir, 'groundtruth_obj3d', tag + '.json'), 'r').readlines()])  # (N')
+    label = load_label( os.path.join(object_dir, 'groundtruth_obj3d', tag + '.json') )
     cls = np.array([line.split()[0] for line in label])  # (N')
     gt_box3d = label_to_gt_box3d(np.array(label)[np.newaxis, :], cls='', coordinate='camera')[0]  # (N', 7) x, y, z, h, w, l, r
 

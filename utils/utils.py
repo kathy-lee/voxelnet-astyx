@@ -74,25 +74,8 @@ def process_pointcloud(point_cloud, cfg):
 
 
 #-- util function to load calib matrices
-CAM = 2
 def load_calib(calib_dir):
-    # # P2 * R0_rect * Tr_velo_to_cam * y
-    # lines = open(calib_dir).readlines()
-    # lines = [ line.split()[1:] for line in lines ][:-1]
-    # #
-    # P = np.array(lines[CAM]).reshape(3,4)
-    # P = np.concatenate( (  P, np.array( [[0,0,0,0]] )  ), 0  )
-    # #
-    # Tr_velo_to_cam = np.array(lines[5]).reshape(3,4)
-    # Tr_velo_to_cam = np.concatenate(  [ Tr_velo_to_cam, np.array([0,0,0,1]).reshape(1,4)  ]  , 0     )
-    # #
-    # R_cam_to_rect = np.eye(4)
-    # R_cam_to_rect[:3,:3] = np.array(lines[4][:9]).reshape(3,3)
-    # #
-    # P = P.astype('float32')
-    # Tr_velo_to_cam = Tr_velo_to_cam.astype('float32')
-    # R_cam_to_rect = R_cam_to_rect.astype('float32')
-    # return P, Tr_velo_to_cam, R_cam_to_rect
+    # output: 3 matrix
     with open(calib_dir, mode='r') as f:
         data = json.load(f)
     T_fromLidar = np.array(data['sensors'][1]['calib_data']['T_to_ref_COS'])
@@ -104,33 +87,38 @@ def load_calib(calib_dir):
     return T_toLidar, T_toCamera, K
 
 def load_label(label_dir):
+    # output: [N,10]
     with open(label_dir, mode='r') as f:
         data = json.load(f)
     objects_info = data['objects']
-    objects = []
-    classids = []
+    #objects = []
+    #classids = []
+    label = np.empty((len(objects_info), 11))
 
-    for p in objects_info:
-        center = np.array(p['center3d'])
-        dimension = np.array(p['dimension3d'])
-        w = dimension[0]
-        l = dimension[1]
-        h = dimension[2]
-        orientation = np.array(p['orientation_quat'])
-        classids.append(p['classname'])
+    for i, p in enumerate(objects_info):
+        label[i,:] = np.array(p['classname'], p['center3d'][0], p['center3d'][1], p['center3d'][2],
+                              p['dimension3d'][2], p['dimension3d'][0], p['dimension3d'][1],
+                              p['orientation_quat'][0], p['orientation_quat'][1], p['orientation_quat'][2], p['orientation_quat'][3]])
+        # center = np.array(p['center3d'])
+        # dimension = np.array(p['dimension3d'])
+        # w = dimension[0]
+        # l = dimension[1]
+        # h = dimension[2]
+        # orientation = np.array(p['orientation_quat'])
+        #classids.append(p['classname'])
 
-        x_corners = [w / 2, -w / 2, -w / 2, w / 2, w / 2, -w / 2, -w / 2, w / 2]
-        y_corners = [l / 2, l / 2, -l / 2, -l / 2, l / 2, l / 2, -l / 2, -l / 2]
-        z_corners = [h / 2, h / 2, h / 2, h / 2, -h / 2, -h / 2, -h / 2, -h / 2]
+        # x_corners = [w / 2, -w / 2, -w / 2, w / 2, w / 2, -w / 2, -w / 2, w / 2]
+        # y_corners = [l / 2, l / 2, -l / 2, -l / 2, l / 2, l / 2, -l / 2, -l / 2]
+        # z_corners = [h / 2, h / 2, h / 2, h / 2, -h / 2, -h / 2, -h / 2, -h / 2]
         # rotate and translate 3d bounding box
-        R = quat_to_rotation(orientation)
-        bbox = np.vstack([x_corners, y_corners, z_corners])
-        bbox = np.dot(R, bbox)
-        bbox = bbox + center[:, np.newaxis]
+        # R = quat_to_rotation(orientation)
+        # bbox = np.vstack([x_corners, y_corners, z_corners])
+        # bbox = np.dot(R, bbox)
+        # bbox = bbox + center[:, np.newaxis]
+        # bbox = np.transpose(bbox)
+        # objects.append(bbox)
 
-        bbox = np.transpose(bbox)
-        objects.append(bbox)
-    return objects,classids
+    return label
 
 def lidar_to_bird_view(x, y, factor=1):
     # using the cfg.INPUT_XXX
@@ -562,11 +550,11 @@ def draw_lidar_box3d_on_birdview(birdview, boxes3d, scores, gt_boxes3d=np.array(
 
 def label_to_gt_box3d(labels, cls='Car', coordinate='camera', T_VELO_2_CAM=None, R_RECT_0=None):
     # Input:
-    #   label: (N, N')
+    #   label: (N, N',11)
     #   cls: 'Car' or 'Pedestrain' or 'Cyclist'
     #   coordinate: 'camera' or 'lidar'
     # Output:
-    #   (N, N', 7)
+    #   (N, N', 10)
     boxes3d = []
     if cls == 'Car':
         acc_cls = ['Car', 'Van']
@@ -579,16 +567,12 @@ def label_to_gt_box3d(labels, cls='Car', coordinate='camera', T_VELO_2_CAM=None,
 
     for label in labels:
         boxes3d_a_label = []
-        for line in label:
-            ret = line.split()
-            if len(ret)>0 and (ret[0] in acc_cls or acc_cls == []):
-                h, w, l, x, y, z, r = [float(i) for i in ret[-7:]]
-                box3d = np.array([x, y, z, h, w, l, r])
+        for row in label:
+            if row[0] in acc_cls or acc_cls == []:
+                box3d = row[1:-1]
                 boxes3d_a_label.append(box3d)
-        if coordinate == 'lidar':
-            boxes3d_a_label = camera_to_lidar_box(np.array(boxes3d_a_label), T_VELO_2_CAM, R_RECT_0)
 
-        boxes3d.append(np.array(boxes3d_a_label).reshape(-1, 7))
+        boxes3d.append(np.array(boxes3d_a_label).reshape(-1, 10))
     return boxes3d
 
 
