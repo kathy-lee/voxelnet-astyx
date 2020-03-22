@@ -126,9 +126,9 @@ def load_label(label_dir):
     label = np.empty((len(objects_info), 11))
 
     for i, p in enumerate(objects_info):
-        label[i,:] = np.array(p['classname'], p['center3d'][0], p['center3d'][1], p['center3d'][2],
+        label[i,:] = np.array([p['classname'], p['center3d'][0], p['center3d'][1], p['center3d'][2],
                               p['dimension3d'][2], p['dimension3d'][0], p['dimension3d'][1],
-                              p['orientation_quat'][0], p['orientation_quat'][1], p['orientation_quat'][2], p['orientation_quat'][3])
+                              p['orientation_quat'][0], p['orientation_quat'][1], p['orientation_quat'][2], p['orientation_quat'][3]])
         # center = np.array(p['center3d'])
         # dimension = np.array(p['dimension3d'])
         # w = dimension[0]
