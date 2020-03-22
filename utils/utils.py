@@ -121,32 +121,12 @@ def load_label(label_dir):
     with open(label_dir, mode='r') as f:
         data = json.load(f)
     objects_info = data['objects']
-    #objects = []
-    #classids = []
-    label = np.empty((len(objects_info), 11))
+    label = np.empty((len(objects_info), 10))
 
     for i, p in enumerate(objects_info):
-        label[i,:] = np.array([p['classname'], p['center3d'][0], p['center3d'][1], p['center3d'][2],
+        label[i,:] = np.array([p['center3d'][0], p['center3d'][1], p['center3d'][2],
                               p['dimension3d'][2], p['dimension3d'][0], p['dimension3d'][1],
                               p['orientation_quat'][0], p['orientation_quat'][1], p['orientation_quat'][2], p['orientation_quat'][3]])
-        # center = np.array(p['center3d'])
-        # dimension = np.array(p['dimension3d'])
-        # w = dimension[0]
-        # l = dimension[1]
-        # h = dimension[2]
-        # orientation = np.array(p['orientation_quat'])
-        #classids.append(p['classname'])
-
-        # x_corners = [w / 2, -w / 2, -w / 2, w / 2, w / 2, -w / 2, -w / 2, w / 2]
-        # y_corners = [l / 2, l / 2, -l / 2, -l / 2, l / 2, l / 2, -l / 2, -l / 2]
-        # z_corners = [h / 2, h / 2, h / 2, h / 2, -h / 2, -h / 2, -h / 2, -h / 2]
-        # rotate and translate 3d bounding box
-        # R = quat_to_rotation(orientation)
-        # bbox = np.vstack([x_corners, y_corners, z_corners])
-        # bbox = np.dot(R, bbox)
-        # bbox = bbox + center[:, np.newaxis]
-        # bbox = np.transpose(bbox)
-        # objects.append(bbox)
 
     return label
 
@@ -567,7 +547,7 @@ def draw_lidar_box3d_on_birdview(birdview, boxes3d, scores, gt_boxes3d=np.array(
 
 def label_to_gt_box3d(labels, cls='Car', coordinate='camera', T_VELO_2_CAM=None, R_RECT_0=None):
     # Input:
-    #   label: (N, N',11)
+    #   label: (N, N',10)
     #   cls: 'Car' or 'Pedestrain' or 'Cyclist'
     #   coordinate: 'camera' or 'lidar'
     # Output:
@@ -586,7 +566,7 @@ def label_to_gt_box3d(labels, cls='Car', coordinate='camera', T_VELO_2_CAM=None,
         boxes3d_a_label = []
         for row in label:
             if row[0] in acc_cls or acc_cls == []:
-                box3d = row[1:-1]
+                box3d = row
                 boxes3d_a_label.append(box3d)
 
         boxes3d.append(np.array(boxes3d_a_label).reshape(-1, 10))
