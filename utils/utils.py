@@ -122,7 +122,7 @@ def load_label(label_dir):
         data = json.load(f)
     objects_info = data['objects']
     label = np.empty((len(objects_info), 10))
-    class_ids = np.empty(len(objects_info))
+    class_ids = np.empty(len(objects_info),dtype=object)
 
     for i, p in enumerate(objects_info):
         label[i,:] = np.array([p['center3d'][0], p['center3d'][1], p['center3d'][2],
