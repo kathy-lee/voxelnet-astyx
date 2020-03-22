@@ -98,7 +98,7 @@ def load_label(label_dir):
     for i, p in enumerate(objects_info):
         label[i,:] = np.array(p['classname'], p['center3d'][0], p['center3d'][1], p['center3d'][2],
                               p['dimension3d'][2], p['dimension3d'][0], p['dimension3d'][1],
-                              p['orientation_quat'][0], p['orientation_quat'][1], p['orientation_quat'][2], p['orientation_quat'][3]])
+                              p['orientation_quat'][0], p['orientation_quat'][1], p['orientation_quat'][2], p['orientation_quat'][3])
         # center = np.array(p['center3d'])
         # dimension = np.array(p['dimension3d'])
         # w = dimension[0]
@@ -198,20 +198,12 @@ def camera_to_lidar_point(points, T_VELO_2_CAM=None, R_RECT_0=None):
     return points.reshape(-1, 3)
 
 
-def lidar_to_camera_point(points, T_VELO_2_CAM=None, R_RECT_0=None):
+def lidar_to_camera_point(points, T_VELO_2_CAM=None):
     # (N, 3) -> (N, 3)
     N = points.shape[0]
     points = np.hstack([points, np.ones((N, 1))]).T
-    
-    
-    if type(T_VELO_2_CAM) == type(None):
-        T_VELO_2_CAM = np.array(cfg.MATRIX_T_VELO_2_CAM)
-    
-    if type(R_RECT_0) == type(None):
-        R_RECT_0 = np.array(cfg.MATRIX_R_RECT_0)
 
     points = np.matmul(T_VELO_2_CAM, points)
-    points = np.matmul(R_RECT_0, points).T
     points = points[:, 0:3]
     return points.reshape(-1, 3)
 
@@ -263,28 +255,25 @@ def center_to_corner_box3d(boxes_center, coordinate='lidar', T_VELO_2_CAM=None, 
         box = boxes_center[i]
         translation = box[0:3]
         size = box[3:6]
-        rotation = [0, 0, box[-1]]
+        quaternion = box[6:-1]
 
-        h, w, l = size[0], size[1], size[2]
-        trackletBox = np.array([  # in velodyne coordinates around zero point and without orientation yet
-            [-l / 2, -l / 2, l / 2, l / 2, -l / 2, -l / 2, l / 2, l / 2], \
-            [w / 2, -w / 2, -w / 2, w / 2, w / 2, -w / 2, -w / 2, w / 2], \
-            [0, 0, 0, 0, h, h, h, h]])
+        w, l, h = size[0], size[1], size[2]
+        trackletBox = np.array([
+            [w / 2, -w / 2, -w / 2, w / 2, w / 2, -w / 2, -w / 2, w / 2],\
+            [l / 2, l / 2, -l / 2, -l / 2, l / 2, l / 2, -l / 2, -l / 2],\
+            [h / 2, h / 2, h / 2, h / 2, -h / 2, -h / 2, -h / 2, -h / 2]])
+        # rotate and translate 3d bounding box
+        R = quat_to_rotation(quaternion)
+        #bbox = np.dot(R, bbox)
+        #bbox = bbox + center[:, np.newaxis]
 
-        # re-create 3D bounding box in velodyne coordinate system
-        yaw = rotation[2]
-        rotMat = np.array([
-            [np.cos(yaw), -np.sin(yaw), 0.0],
-            [np.sin(yaw), np.cos(yaw), 0.0],
-            [0.0, 0.0, 1.0]])
-        cornerPosInVelo = np.dot(rotMat, trackletBox) + \
+        cornerPosInVelo = np.dot(R, trackletBox) + \
             np.tile(translation, (8, 1)).T
         box3d = cornerPosInVelo.transpose()
         ret[i] = box3d
 
-    if coordinate == 'camera':
-        for idx in range(len(ret)):
-            ret[idx] = lidar_to_camera_point(ret[idx], T_VELO_2_CAM, R_RECT_0)
+    # for idx in range(len(ret)):
+    #     ret[idx] = lidar_to_camera_point(ret[idx], T_VELO_2_CAM)
 
     return ret
 
@@ -407,19 +396,17 @@ def corner_to_center_box3d(boxes_corner, coordinate='camera', T_VELO_2_CAM=None,
 
 
 # this just for visulize and testing
-def lidar_box3d_to_camera_box(boxes3d, cal_projection=False, P2 = None, T_VELO_2_CAM=None, R_RECT_0=None):
-    # (N, 7) -> (N, 4)/(N, 8, 2)  x,y,z,h,w,l,rz -> x1,y1,x2,y2/8*(x, y)
+def lidar_box3d_to_camera_box(boxes3d, cal_projection=False, P2 = None, T_VELO_2_CAM=None):
+    # (N, 10) -> (N, 4)/(N, 8, 2)  x,y,z,h,w,l,q0-q3 -> x1,y1,x2,y2/8*(x, y)
     num = len(boxes3d)
     boxes2d = np.zeros((num, 4), dtype=np.int32)
     projections = np.zeros((num, 8, 2), dtype=np.float32)
 
     lidar_boxes3d_corner = center_to_corner_box3d(boxes3d, coordinate='lidar', T_VELO_2_CAM=T_VELO_2_CAM, R_RECT_0=R_RECT_0)
-    if type(P2) == type(None):
-        P2 = np.array(cfg.MATRIX_P2)
 
     for n in range(num):
         box3d = lidar_boxes3d_corner[n]
-        box3d = lidar_to_camera_point(box3d, T_VELO_2_CAM, R_RECT_0)
+        box3d = lidar_to_camera_point(box3d, T_VELO_2_CAM)
         points = np.hstack((box3d, np.ones((8, 1)))).T  # (8, 4) -> (4, 8)
         points = np.matmul(P2, points).T
         points[:, 0] /= points[:, 2]
@@ -460,15 +447,15 @@ def lidar_to_bird_view_img(lidar, factor=1):
 
 
 def draw_lidar_box3d_on_image(img, boxes3d, scores, gt_boxes3d=np.array([]),
-                              color=(0, 255, 255), gt_color=(255, 0, 255), thickness=1, P2 = None, T_VELO_2_CAM=None, R_RECT_0=None):
+                              color=(0, 255, 255), gt_color=(255, 0, 255), thickness=1, P2 = None, T_VELO_2_CAM=None):
     # Input:
     #   img: (h, w, 3)
     #   boxes3d (N, 7) [x, y, z, h, w, l, r]
     #   scores
     #   gt_boxes3d (N, 7) [x, y, z, h, w, l, r]
     img = img.copy()
-    projections = lidar_box3d_to_camera_box(boxes3d, cal_projection=True, P2=P2, T_VELO_2_CAM=T_VELO_2_CAM, R_RECT_0=R_RECT_0)
-    gt_projections = lidar_box3d_to_camera_box(gt_boxes3d, cal_projection=True, P2=P2, T_VELO_2_CAM=T_VELO_2_CAM, R_RECT_0=R_RECT_0)
+    projections = lidar_box3d_to_camera_box(boxes3d, cal_projection=True, P2=P2, T_VELO_2_CAM=T_VELO_2_CAM)
+    gt_projections = lidar_box3d_to_camera_box(gt_boxes3d, cal_projection=True, P2=P2, T_VELO_2_CAM=T_VELO_2_CAM)
 
     # draw projections
     for qs in projections:
@@ -573,6 +560,7 @@ def label_to_gt_box3d(labels, cls='Car', coordinate='camera', T_VELO_2_CAM=None,
                 boxes3d_a_label.append(box3d)
 
         boxes3d.append(np.array(boxes3d_a_label).reshape(-1, 10))
+
     return boxes3d
 
 
@@ -628,11 +616,11 @@ def box3d_to_label(batch_box3d, batch_cls, batch_score=[], coordinate='camera', 
 
 def cal_anchors(cfg):
     # Output:
-    #   anchors: (w, l, 2, 7) x y z h w l r
+    #   anchors: (w, l, 2, 7) x y z h w l q0 q1 q2 q3
     x = np.linspace(cfg.X_MIN, cfg.X_MAX, cfg.FEATURE_WIDTH)
     y = np.linspace(cfg.Y_MIN, cfg.Y_MAX, cfg.FEATURE_HEIGHT)
     cx, cy = np.meshgrid(x, y)
-    # all is (w, l, 2)
+    # all is (w, l, 2)cal_anchors
     cx = np.tile(cx[..., np.newaxis], 2)
     cy = np.tile(cy[..., np.newaxis], 2)
     cz = np.ones_like(cx) * cfg.ANCHOR_Z

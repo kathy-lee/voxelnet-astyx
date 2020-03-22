@@ -13,6 +13,7 @@ def predict_step(model, batch, anchors, cfg, params, summary=False, vis=False):
     return model.strategy.experimental_run_v2(model._predict_step, args=(batch["feature_buffer"], batch["coordinate_buffer"]))
 
   tag = batch["tag"].numpy().astype(str)
+
   if summary or vis:
     batch_gt_boxes3d = label_to_gt_box3d(
     batch["labels"].numpy().astype(str), cls=cfg.DETECT_OBJECT, coordinate='lidar')
@@ -54,19 +55,19 @@ def predict_step(model, batch, anchors, cfg, params, summary=False, vis=False):
   
   img = 255. * batch["img"].numpy() #tensorflow scales the image between 0 and 1 when reading it, we need to rescale it between 0 and 255
   if summary:
-    # only summry 1 in a batch
+    # only summary 1 in a batch
     cur_tag = tag[0]
-    P, Tr, R = load_calib( os.path.join( cfg.CALIB_DIR, cur_tag + '.txt' ) )
+    _, Tr, P = load_calib(os.path.join(cfg.CALIB_DIR, cur_tag + '.txt'))
 
     front_image = draw_lidar_box3d_on_image(img[0], ret_box3d[0], ret_score[0],
-                                                  batch_gt_boxes3d[0], P2=P, T_VELO_2_CAM=Tr, R_RECT_0=R)
+                                                  batch_gt_boxes3d[0], P2=P, T_VELO_2_CAM=Tr)
           
     n_points = batch["num_points"][0].numpy()
     lidar = batch["lidar"][0][0:n_points,].numpy()
     bird_view = lidar_to_bird_view_img(lidar, factor=cfg.BV_LOG_FACTOR)
               
     bird_view = draw_lidar_box3d_on_birdview(bird_view, ret_box3d[0], ret_score[0],
-                                                    batch_gt_boxes3d[0], factor=cfg.BV_LOG_FACTOR, P2=P, T_VELO_2_CAM=Tr, R_RECT_0=R)
+                                                    batch_gt_boxes3d[0], factor=cfg.BV_LOG_FACTOR, P2=P, T_VELO_2_CAM=Tr)
 
     heatmap = colorize(probs[0, ...], cfg.BV_LOG_FACTOR)
     return {"tag":tag, "scores":ret_box3d_score, "front_image":tf.expand_dims(front_image, axis=0), 
