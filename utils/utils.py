@@ -1,9 +1,7 @@
 import cv2
 import numpy as np
-import shapely.geometry
-import shapely.affinity
 import math
-from numba import jit
+import json
 
 #from config import cfg
 from utils.box_overlaps import *
@@ -72,6 +70,38 @@ def process_pointcloud(point_cloud, cfg):
                   'number_buffer': number_buffer}
     return voxel_dict
 
+# transformation matrix converts from sensorA->sensorB to sensorB->sensorA
+def inv_trans(T):
+    rotation = np.linalg.inv(T[0:3, 0:3])  # rotation matrix
+
+    translation = T[0:3, 3]
+    translation = -1 * np.dot(rotation, translation.T)
+    translation = np.reshape(translation, (3, 1))
+    Q = np.hstack((rotation, translation))
+
+    return Q
+
+def quat_to_rotation(quat):
+    m = np.sum(np.multiply(quat, quat))
+    q = quat.copy()
+    q = np.array(q)
+    n = np.dot(q, q)
+    if n < np.finfo(q.dtype).eps:
+        rot_matrix = np.identity(4)
+        return rot_matrix
+    q = q * np.sqrt(2.0 / n)
+    q = np.outer(q, q)
+    rot_matrix = np.array(
+        [[1.0 - q[2, 2] - q[3, 3], q[1, 2] + q[3, 0], q[1, 3] - q[2, 0]],
+         [q[1, 2] - q[3, 0], 1.0 - q[1, 1] - q[3, 3], q[2, 3] + q[1, 0]],
+         [q[1, 3] + q[2, 0], q[2, 3] - q[1, 0], 1.0 - q[1, 1] - q[2, 2]]],
+        dtype=q.dtype)
+    rot_matrix = np.transpose(rot_matrix)
+    # # test if it is truly a rotation matrix
+    # d = np.linalg.det(rotation)
+    # t = np.transpose(rotation)
+    # o = np.dot(rotation, t)
+    return rot_matrix
 
 #-- util function to load calib matrices
 def load_calib(calib_dir):
@@ -402,7 +432,7 @@ def lidar_box3d_to_camera_box(boxes3d, cal_projection=False, P2 = None, T_VELO_2
     boxes2d = np.zeros((num, 4), dtype=np.int32)
     projections = np.zeros((num, 8, 2), dtype=np.float32)
 
-    lidar_boxes3d_corner = center_to_corner_box3d(boxes3d, coordinate='lidar', T_VELO_2_CAM=T_VELO_2_CAM, R_RECT_0=R_RECT_0)
+    lidar_boxes3d_corner = center_to_corner_box3d(boxes3d, coordinate='lidar', T_VELO_2_CAM=T_VELO_2_CAM)
 
     for n in range(num):
         box3d = lidar_boxes3d_corner[n]
