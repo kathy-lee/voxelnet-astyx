@@ -117,18 +117,19 @@ def load_calib(calib_dir):
     return T_toLidar, T_toCamera, K
 
 def load_label(label_dir):
-    # output: [N,10]
+    # output: [N,10],[N,1]
     with open(label_dir, mode='r') as f:
         data = json.load(f)
     objects_info = data['objects']
     label = np.empty((len(objects_info), 10))
+    class_ids = np.empty(len(objects_info))
 
     for i, p in enumerate(objects_info):
         label[i,:] = np.array([p['center3d'][0], p['center3d'][1], p['center3d'][2],
                               p['dimension3d'][2], p['dimension3d'][0], p['dimension3d'][1],
                               p['orientation_quat'][0], p['orientation_quat'][1], p['orientation_quat'][2], p['orientation_quat'][3]])
-
-    return label
+        classid[i] = p['classname']
+    return label,class_ids
 
 def lidar_to_bird_view(x, y, factor=1):
     # using the cfg.INPUT_XXX
