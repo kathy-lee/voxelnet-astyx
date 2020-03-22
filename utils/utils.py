@@ -128,7 +128,7 @@ def load_label(label_dir):
         label[i,:] = np.array([p['center3d'][0], p['center3d'][1], p['center3d'][2],
                               p['dimension3d'][2], p['dimension3d'][0], p['dimension3d'][1],
                               p['orientation_quat'][0], p['orientation_quat'][1], p['orientation_quat'][2], p['orientation_quat'][3]])
-        classid[i] = p['classname']
+        class_ids[i] = p['classname']
     return label,class_ids
 
 def lidar_to_bird_view(x, y, factor=1):
