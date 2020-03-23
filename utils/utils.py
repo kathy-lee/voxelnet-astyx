@@ -255,7 +255,8 @@ def center_to_corner_box2d(boxes_center, coordinate='lidar', T_VELO_2_CAM=None, 
 
 
 def center_to_corner_box3d(boxes_center, coordinate='lidar', T_VELO_2_CAM=None, R_RECT_0=None):
-    # (N, 7) -> (N, 8, 3)
+    # (N, 10) -> (N, 8, 3)
+
     N = boxes_center.shape[0]
     ret = np.zeros((N, 8, 3), dtype=np.float32)
 
@@ -332,10 +333,11 @@ def anchor_to_standup_box2d(anchors):
 
 
 def corner_to_center_box3d(boxes_corner, coordinate='camera', T_VELO_2_CAM=None, R_RECT_0=None):
-    # (N, 8, 3) -> (N, 7) x,y,z,h,w,l,ry/z
-    if coordinate == 'lidar':
-        for idx in range(len(boxes_corner)):
-            boxes_corner[idx] = lidar_to_camera_point(boxes_corner[idx], T_VELO_2_CAM, R_RECT_0)
+    # (N, 8, 3) -> (N, 10) x,y,z,h,w,l,ry/z
+
+    # if coordinate == 'lidar':
+    #     for idx in range(len(boxes_corner)):
+    #         boxes_corner[idx] = lidar_to_camera_point(boxes_corner[idx], T_VELO_2_CAM, R_RECT_0)
     ret = []
     for roi in boxes_corner:
         if cfg.CORNER2CENTER_AVG:  # average version
@@ -809,9 +811,9 @@ def point_transform(points, tx, ty, tz, rx=0, ry=0, rz=0):
 
 def box_transform(boxes, tx, ty, tz, r=0, coordinate='lidar'):
     # Input:
-    #   boxes: (N, 7) x y z h w l rz/y
+    #   boxes: (N, 10) x y z h w l q0-3
     # Output:
-    #   boxes: (N, 7) x y z h w l rz/y
+    #   boxes: (N, 10) x y z h w l q0-3
     boxes_corner = center_to_corner_box3d(
         boxes, coordinate=coordinate)  # (N, 8, 3)
     for idx in range(len(boxes_corner)):
