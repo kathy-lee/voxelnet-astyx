@@ -705,8 +705,8 @@ def gt_boxes3d_to_yaw(batch_boxes, T_VELO_2_CAM):
     # Output: (N, N', 7)
 
     batch_boxes_yaw = []
-    batch_N, object_N, _ = len(batch_boxes)
-    for i in batch_boxes:
+    (batch_N, object_N, _) = batch_boxes.shape
+    for i in batch_N:
         boxes = []
         for j in object_N:
             center_point = batch_boxes[i, j, 0:3]
