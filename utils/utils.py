@@ -649,8 +649,84 @@ def cal_anchors(cfg):
 
     return anchors
 
+def quat_to_mat(quat):
+    q = quat.copy()
+    q=np.array(q)
+    n = np.dot(q, q)
+    if n < np.finfo(q.dtype).eps:
+        rot_matrix=np.identity(4)
+        return rot_matrix
+    q = q * np.sqrt(2.0 / n)
+    q = np.outer(q, q)
+    rot_matrix = np.array(
+        [[1.0 - q[2, 2] - q[3, 3], q[1, 2] + q[3, 0], q[1, 3] - q[2, 0]],
+         [q[1, 2] - q[3, 0], 1.0 - q[1, 1] - q[3, 3], q[2, 3] + q[1, 0]],
+         [q[1, 3] + q[2, 0], q[2, 3] - q[1, 0], 1.0 - q[1, 1] - q[2, 2]]],
+        dtype=q.dtype)
+    return rot_matrix
 
-def cal_rpn_target(labels, feature_map_shape, anchors, cls='Car', coordinate='lidar'):
+def mat_to_ang(R):
+    q = np.zeros(4)
+    K = np.zeros([4, 4])
+    K[0, 0] = 1 / 3 * (R[0, 0] - R[1, 1] - R[2, 2])
+    K[0, 1] = 1 / 3 * (R[1, 0] + R[0, 1])
+    K[0, 2] = 1 / 3 * (R[2, 0] + R[0, 2])
+    K[0, 3] = 1 / 3 * (R[1, 2] - R[2, 1])
+    K[1, 0] = 1 / 3 * (R[1, 0] + R[0, 1])
+    K[1, 1] = 1 / 3 * (R[1, 1] - R[0, 0] - R[2, 2])
+    K[1, 2] = 1 / 3 * (R[2, 1] + R[1, 2])
+    K[1, 3] = 1 / 3 * (R[2, 0] - R[0, 2])
+    K[2, 0] = 1 / 3 * (R[2, 0] + R[0, 2])
+    K[2, 1] = 1 / 3 * (R[2, 1] + R[1, 2])
+    K[2, 2] = 1 / 3 * (R[2, 2] - R[0, 0] - R[1, 1])
+    K[2, 3] = 1 / 3 * (R[0, 1] - R[1, 0])
+    K[3, 0] = 1 / 3 * (R[1, 2] - R[2, 1])
+    K[3, 1] = 1 / 3 * (R[2, 0] - R[0, 2])
+    K[3, 2] = 1 / 3 * (R[0, 1] - R[1, 0])
+    K[3, 3] = 1 / 3 * (R[0, 0] + R[1, 1] + R[2, 2])
+    D, V = np.linalg.eig(K)
+    pp = 0
+    for i in range(1, 4):
+        if (D[i] > D[pp]):
+            pp = i
+    q = V[:, pp]
+    x = q[3]
+    y = q[0]
+    z = q[1]
+    w = q[2]
+    rol = math.atan2(2 * (w * x + y * z), 1 - 2 * (x * x + y * y))  # the rol is the yaw angle!
+    # pith = math.asin(2*(w*y-z*z))
+    # yaw = math.atan2(2*(w*z+x*y),1-2*(z*z+y*y))
+
+    return rol
+
+def gt_boxes3d_to_yaw(batch_boxes, T_VELO_2_CAM):
+    # Input: (N, N', 10)
+    # Output: (N, N', 7)
+
+    batch_boxes_yaw = []
+    batch_N, object_N, _ = len(batch_boxes)
+    for i in batch_boxes:
+        boxes = []
+        for j in object_N:
+            center_point = batch_boxes[i, j, 0:3]
+            center_point = np.matmul(T_VELO_2_CAM, center_point)
+
+            quaternion = batch_boxes[i, j, -3:-1]
+            rotation_mat = quat_to_mat(quaternion)
+            rotation_mat = np.matmul(T_VELO_2_CAM, rotation_mat)
+            yaw = mat_to_ang(rotation_mat)
+
+            box = np.vstack(center_point, batch_boxes[i, j, 3:6], yaw)
+
+        print(f'boxes:{len(boxes)}')
+        batch_boxes_yaw.append(boxes)
+
+    print(f'batch boxes:{len(batch_boxes_yaw)}')
+
+    return np.array(batch_boxes_yaw)
+
+def cal_rpn_target(labels, T_VELO_2_CAM, feature_map_shape, anchors, cls='Car', coordinate='lidar'):
     # Input:
     #   labels: (N, N')
     #   feature_map_shape: (w, l)
@@ -662,6 +738,8 @@ def cal_rpn_target(labels, feature_map_shape, anchors, cls='Car', coordinate='li
     # attention: cal IoU on birdview
     batch_size = labels.shape[0]
     batch_gt_boxes3d = label_to_gt_box3d(labels, cls=cls, coordinate=coordinate)
+    # projection gt_boxes3d from 10 dimension to 7 dimension (x y z h w l q0-3 -> x y z h w l r)
+    batch_gt_boxes3d = gt_boxes3d_to_yaw(batch_gt_boxes3d, T_VELO_2_CAM)
     # defined in eq(1) in 2.2
     anchors_reshaped = anchors.reshape(-1, 7)
     anchors_d = np.sqrt(anchors_reshaped[:, 4]**2 + anchors_reshaped[:, 5]**2)

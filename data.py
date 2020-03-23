@@ -1,4 +1,4 @@
-from utils.utils import cal_anchors, process_pointcloud, cal_rpn_target
+from utils.utils import cal_anchors, process_pointcloud, cal_rpn_target, load_calib, load_label
 import tensorflow as tf
 import glob
 import random
@@ -67,6 +67,7 @@ class Data_helper:
     img_dir = "{}/{}/camera_front".format(cfg.DATA_DIR, data_d)
     labels_dir = "{}/{}/groundtruth_obj3d".format(cfg.DATA_DIR, data_d)
     pc_dir = "{}/{}/radar_6455".format(cfg.DATA_DIR, data_d)
+    calib_dir = "{}/{}/calibration".format(cfg.DATA_DIR, data_d)
     
     if mode in ["train", "sample_test"]:
       random.shuffle(self.tags)
@@ -75,6 +76,7 @@ class Data_helper:
       sorted(self.tags)
     for index in self.tags:
       #index = next(self.tag_gen)
+      print(f'index:{index}')
       dic = {}
       if is_aug_data:
         dic = aug_data(index, os.path.join(cfg.DATA_DIR, data_d))
@@ -107,7 +109,8 @@ class Data_helper:
         dic.update(process_pointcloud(pc, cfg))
 
       if mode in ["train", "eval", "sample_test"]:
-        dic["pos_equal_one"], dic["neg_equal_one"], dic["targets"]= cal_rpn_target(dic["labels"][np.newaxis, ...].astype(str), 
+        _, Tr, _ = load_calib("%s/%06d.json" % (calib_dir,int(index)))
+        dic["pos_equal_one"], dic["neg_equal_one"], dic["targets"]= cal_rpn_target(dic["labels"][np.newaxis, ...].astype(str), Tr,
                                                                                       cfg.MAP_SHAPE , 
                                                                                       self.anchors, 
                                                                                       cfg.DETECT_OBJECT, 
