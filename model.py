@@ -280,7 +280,7 @@ class Model(tf.keras.Model):
     grads = tape.gradient(loss, self.trainable_variables)
     normed_grads, norm = tf.clip_by_global_norm(grads, self.params["max_gradient_norm"])
     self.optimizer.optimizer.apply_gradients(zip(normed_grads, self.trainable_variables))
-    print('finish train step:')
+    print('finish train step.')
     return loss, reg_loss, cls_loss, cls_pos_loss, cls_neg_loss
 
   def dist_train_step(self, feature_buffer,
