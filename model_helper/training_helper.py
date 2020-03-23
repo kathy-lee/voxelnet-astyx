@@ -58,6 +58,7 @@ def train_epochs( model, train_batcher, rand_test_batcher, val_batcher,  params,
                                                             batch["pos_equal_one_sum"],
                                                             batch["neg_equal_one"], 
                                                             batch["neg_equal_one_sum"]))
+    print('finish experimental_run_v2.')
     return [strategy.reduce(tf.distribute.ReduceOp.SUM, per_replica_loss,
                           axis=None) for per_replica_loss in per_replica_losses]
 
