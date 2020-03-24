@@ -555,7 +555,7 @@ def draw_lidar_box3d_on_birdview(birdview, boxes3d, scores, gt_boxes3d=np.array(
 
 def label_to_gt_box3d(labels, cls='Car'):
     # Input:
-    #   label: (N, N',10)
+    #   label: (N, N',11)
     #   cls: 'Car' or 'Pedestrain' or 'Cyclist'
     #   coordinate: 'camera' or 'lidar'
     # Output:
@@ -563,13 +563,15 @@ def label_to_gt_box3d(labels, cls='Car'):
     print(f'raw labels:{labels}')
     boxes3d = []
     if cls == 'Car':
-        acc_cls = ['Car', 'Van']
+        acc_cls = ['Car']
     elif cls == 'Pedestrian':
         acc_cls = ['Pedestrian']
     elif cls == 'Cyclist':
         acc_cls = ['Cyclist']
     else: # all
         acc_cls = []
+
+    acc_cls = [get_class_id(x) for x in acc_cls]
 
     for label in labels:
         boxes3d_a_label = []
