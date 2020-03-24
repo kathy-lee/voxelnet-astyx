@@ -703,7 +703,7 @@ def mat_to_ang(R):
 def gt_boxes3d_to_yaw(batch_boxes, T_VELO_2_CAM):
     # Input: (N, N', 10)
     # Output: (N, N', 7)
-
+    print(f'raw batch boxes:{batch_boxes}')
     batch_boxes_yaw = []
     for boxes in batch_boxes:
         boxes_yaw = []
