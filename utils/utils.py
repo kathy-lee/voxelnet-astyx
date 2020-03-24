@@ -705,10 +705,9 @@ def gt_boxes3d_to_yaw(batch_boxes, T_VELO_2_CAM):
     # Output: (N, N', 7)
 
     batch_boxes_yaw = []
-    (batch_N, object_N, _) = batch_boxes.shape
-    for i in batch_N:
-        boxes = []
-        for j in object_N:
+    for boxes in batch_boxes:
+        boxes_yaw = []
+        for box in boxes:
             center_point = batch_boxes[i, j, 0:3]
             center_point = np.matmul(T_VELO_2_CAM, center_point)
 
@@ -717,15 +716,15 @@ def gt_boxes3d_to_yaw(batch_boxes, T_VELO_2_CAM):
             rotation_mat = np.matmul(T_VELO_2_CAM, rotation_mat)
             yaw = mat_to_ang(rotation_mat)
 
-            box = np.vstack(center_point, batch_boxes[i, j, 3:6], yaw)
-            boxes.append(box)
+            box_yaw = np.vstack(center_point, batch_boxes[i, j, 3:6], yaw)
+            boxes_yaw.append(box_yaw)
 
-        print(f'boxes:{len(boxes)}')
-        batch_boxes_yaw.append(boxes)
+        print(f'boxes:{len(boxes_yaw)}')
+        batch_boxes_yaw.append(np.array(boxes_yaw).reshape(-1, 7))
 
     print(f'batch boxes:{len(batch_boxes_yaw)}')
 
-    return np.array(batch_boxes_yaw)
+    return batch_boxes_yaw
 
 def cal_rpn_target(labels, T_VELO_2_CAM, feature_map_shape, anchors, cls='Car', coordinate='lidar'):
     # Input:
