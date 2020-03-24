@@ -17,7 +17,7 @@ def aug_data(tag, object_dir):
     #     object_dir, 'groundtruth_obj3d', tag + '.json'), 'r').readlines()])  # (N')
     label = load_label( os.path.join(object_dir, 'groundtruth_obj3d', tag + '.json') )
     #cls = np.array([line[10] for line in label])  # (N')
-    gt_box3d = label_to_gt_box3d(label, cls='')[0]  # (N', 7) x, y, z, h, w, l, r
+    gt_box3d = label_to_gt_box3d(label[np.newaxis, :], cls='')[0]  # (N', 7) x, y, z, h, w, l, r
 
     choice = np.random.randint(0, 10)
     if choice <= -1: #disabled
