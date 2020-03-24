@@ -116,20 +116,25 @@ def load_calib(calib_dir):
     T_toCamera = inv_trans(T_fromCamera)
     return T_toLidar, T_toCamera, K
 
+def get_class_id(classname):
+
+    classes = {'Bus': 0, 'Car':1, 'Cyclist': 2, 'Motorcyclist': 3, 'Person': 4, 'Trailer':5, 'Truck':6}
+    return classes[classname]
+
 def load_label(label_dir):
-    # output: [N,10],[N,1]
+    # output: [N,11]
     with open(label_dir, mode='r') as f:
         data = json.load(f)
     objects_info = data['objects']
-    label = np.empty((len(objects_info), 10))
-    class_ids = np.empty(len(objects_info),dtype=object)
+    label = np.empty((len(objects_info), 11))
 
     for i, p in enumerate(objects_info):
         label[i,:] = np.array([p['center3d'][0], p['center3d'][1], p['center3d'][2],
                               p['dimension3d'][2], p['dimension3d'][0], p['dimension3d'][1],
-                              p['orientation_quat'][0], p['orientation_quat'][1], p['orientation_quat'][2], p['orientation_quat'][3]])
+                              p['orientation_quat'][0], p['orientation_quat'][1], p['orientation_quat'][2], p['orientation_quat'][3],
+                              get_class_id(p['classname'])])
         class_ids[i] = p['classname']
-    return label,class_ids
+    return label
 
 def lidar_to_bird_view(x, y, factor=1):
     # using the cfg.INPUT_XXX
@@ -548,7 +553,7 @@ def draw_lidar_box3d_on_birdview(birdview, boxes3d, scores, gt_boxes3d=np.array(
     return cv2.cvtColor(img.astype(np.uint8), cv2.COLOR_BGR2RGB)
 
 
-def label_to_gt_box3d(labels, cls='Car', coordinate='camera', T_VELO_2_CAM=None, R_RECT_0=None):
+def label_to_gt_box3d(labels, cls='Car'):
     # Input:
     #   label: (N, N',10)
     #   cls: 'Car' or 'Pedestrain' or 'Cyclist'
@@ -569,8 +574,8 @@ def label_to_gt_box3d(labels, cls='Car', coordinate='camera', T_VELO_2_CAM=None,
     for label in labels:
         boxes3d_a_label = []
         for row in label:
-            if row[0] in acc_cls or acc_cls == []:
-                box3d = row
+            if row[10] in acc_cls or acc_cls == []:
+                box3d = row[:-2]
                 boxes3d_a_label.append(box3d)
 
         boxes3d.append(np.array(boxes3d_a_label).reshape(-1, 10))
@@ -739,7 +744,7 @@ def cal_rpn_target(labels, T_VELO_2_CAM, feature_map_shape, anchors, cls='Car', 
     #   targets (N, w, l, 14)
     # attention: cal IoU on birdview
     batch_size = labels.shape[0]
-    batch_gt_boxes3d = label_to_gt_box3d(labels, cls=cls, coordinate=coordinate)
+    batch_gt_boxes3d = label_to_gt_box3d(labels, cls=cls)
     # projection gt_boxes3d from 10 dimension to 7 dimension (x y z h w l q0-3 -> x y z h w l r)
     batch_gt_boxes3d = gt_boxes3d_to_yaw(batch_gt_boxes3d, T_VELO_2_CAM)
     # defined in eq(1) in 2.2

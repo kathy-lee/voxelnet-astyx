@@ -15,9 +15,9 @@ def aug_data(tag, object_dir):
                                      'radar_6455', tag + '.bin'), dtype=np.float32).reshape(-1, 4)
     # label = np.array([line for line in open(os.path.join(
     #     object_dir, 'groundtruth_obj3d', tag + '.json'), 'r').readlines()])  # (N')
-    label,cls = load_label( os.path.join(object_dir, 'groundtruth_obj3d', tag + '.json') )
-    # cls = np.array([line.split()[0] for line in label])  # (N')
-    gt_box3d = label_to_gt_box3d(np.array(label)[np.newaxis, :], cls='', coordinate='camera')[0]  # (N', 7) x, y, z, h, w, l, r
+    label = load_label( os.path.join(object_dir, 'groundtruth_obj3d', tag + '.json') )
+    #cls = np.array([line[10] for line in label])  # (N')
+    gt_box3d = label_to_gt_box3d(label, cls='')[0]  # (N', 7) x, y, z, h, w, l, r
 
     choice = np.random.randint(0, 10)
     if choice <= -1: #disabled

@@ -16,7 +16,7 @@ def predict_step(model, batch, anchors, cfg, params, summary=False, vis=False):
 
   if summary or vis:
     batch_gt_boxes3d = label_to_gt_box3d(
-    batch["labels"].numpy().astype(str), cls=cfg.DETECT_OBJECT, coordinate='lidar')
+    batch["labels"], cls=cfg.DETECT_OBJECT)
   print('predict', tag)
 
   res = distributed_predict_step()

@@ -89,11 +89,11 @@ class Data_helper:
         elif mode == "sample_test" or mode== "eval":
           dic["lidar"] = pc
           #dic["labels"] = np.array([line.strip() for line in open("%s/%06d.txt" % (labels_dir, int(index)) , 'r').readlines()])
-          _, dic["labels"] = load_label("%s/%06d.json" % (labels_dir,int(index)))
+          dic["labels"] = load_label("%s/%06d.json" % (labels_dir,int(index)))
         else:
           dic["lidar"] = 0
           #dic["labels"] = np.array([line.strip() for line in open("%s/%06d.txt" % (labels_dir, int(index)) , 'r').readlines()])
-          _, dic["labels"] = load_label("%s/%06d.json" % (labels_dir,int(index)))
+          dic["labels"] = load_label("%s/%06d.json" % (labels_dir,int(index)))
         dic["num_points"] = len(pc)
 
         if mode == "train":
