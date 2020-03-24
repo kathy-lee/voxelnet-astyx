@@ -578,7 +578,7 @@ def label_to_gt_box3d(labels, cls='Car'):
         for row in label:
             print(f'row:{row}')
             if row[10] in acc_cls or acc_cls == []:
-                box3d = row[:-2]
+                box3d = row[0:10]
                 print(f'boxe3d:{box3d.shape}')
                 boxes3d_a_label.append(box3d)
 
