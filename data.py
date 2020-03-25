@@ -134,7 +134,7 @@ class Data_helper:
       print('finish one time fill queqe.')
       print('yielded dic:')
       print(f'labels: {dic["labels"].shape}')
-      print(f'tag: {dic["tag"].shape}')
+      print(f'tag: {dic["tag"]}')
       print(f'feature_buffer: {dic["feature_buffer"].shape}')
       print(f'coordinate_buffer: {dic["coordinate_buffer"].shape}')
       print(f'number_buffer: {dic["number_buffer"].shape}')
@@ -177,7 +177,7 @@ class Data_helper:
     dataset = tf.data.Dataset.from_generator(lambda: self.fill_examples_queue(self.cfg, mode,is_aug_data), 
                                             output_types={
                                                 "img" : tf.float32,
-                                                "labels" : tf.string,
+                                                "labels" : tf.float32,
                                                 "tag" : tf.string,
                                                 "feature_buffer" : tf.float32,
                                                 "coordinate_buffer" : tf.int32,
@@ -193,7 +193,7 @@ class Data_helper:
                                             },
                                             output_shapes={
                                                 "img" : [cfg.IMG_HEIGHT, cfg.IMG_WIDTH, cfg.IMG_CHANNEL] if mode!="train" else [],
-                                                "labels" : [None],
+                                                "labels" : [None, 11],
                                                 "tag" : [],
                                                 "feature_buffer" : [None, cfg.MAX_POINT_NUMBER, 7],
                                                 "coordinate_buffer" : [None, 3],
