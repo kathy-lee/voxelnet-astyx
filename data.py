@@ -130,7 +130,8 @@ class Data_helper:
       else:
         dic["pos_equal_one"], dic["neg_equal_one"], dic["targets"] = 0,0,0
         dic["pos_equal_one_reg"], dic["pos_equal_one_sum"], dic["neg_equal_one_sum"] = 0,0,0
-      
+
+      print('finish one time fill queqe.')
       yield dic
       #self.ex_queue.put(dic)
 
