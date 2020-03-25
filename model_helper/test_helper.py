@@ -15,8 +15,7 @@ def predict_step(model, batch, anchors, cfg, params, summary=False, vis=False):
   tag = batch["tag"].numpy().astype(str)
 
   if summary or vis:
-    batch_gt_boxes3d = label_to_gt_box3d(
-    batch["labels"], cls=cfg.DETECT_OBJECT)
+    batch_gt_boxes3d = label_to_gt_box3d(batch["labels"], cls=cfg.DETECT_OBJECT)
   print('predict', tag)
 
   res = distributed_predict_step()

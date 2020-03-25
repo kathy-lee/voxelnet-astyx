@@ -103,6 +103,17 @@ def quat_to_rotation(quat):
     # o = np.dot(rotation, t)
     return rot_matrix
 
+def qaut_to_angle(quat):
+    w=quat[0]
+    x=quat[1]
+    y=quat[2]
+    z=quat[3]
+
+    rol = math.atan2(2*(w*x+y*z),1-2*(x*x+y*y))#the rol is the yaw angle!
+    pith = math.asin(2*(w*y-x*z))
+    yaw = math.atan2(2*(w*z+x*y),1-2*(z*z+y*y))
+    return yaw
+
 #-- util function to load calib matrices
 def load_calib(calib_dir):
     # output: 3 matrix
@@ -272,7 +283,7 @@ def center_to_corner_box3d(boxes_center, coordinate='lidar', T_VELO_2_CAM=None, 
         box = boxes_center[i]
         translation = box[0:3]
         size = box[3:6]
-        quaternion = box[6:-1]
+        quaternion = [0, 0, box[-1]]
 
         w, l, h = size[0], size[1], size[2]
         trackletBox = np.array([
@@ -281,11 +292,11 @@ def center_to_corner_box3d(boxes_center, coordinate='lidar', T_VELO_2_CAM=None, 
             [h / 2, h / 2, h / 2, h / 2, -h / 2, -h / 2, -h / 2, -h / 2]])
         # rotate and translate 3d bounding box
         R = quat_to_rotation(quaternion)
+        print(f'R:{R.shape}')
         #bbox = np.dot(R, bbox)
         #bbox = bbox + center[:, np.newaxis]
 
-        cornerPosInVelo = np.dot(R, trackletBox) + \
-            np.tile(translation, (8, 1)).T
+        cornerPosInVelo = np.dot(R, trackletBox) + np.tile(translation, (8, 1)).T
         box3d = cornerPosInVelo.transpose()
         ret[i] = box3d
 
@@ -744,7 +755,34 @@ def gt_boxes3d_to_yaw(batch_boxes, T_VELO_2_CAM):
 
     return batch_boxes_yaw
 
-def cal_rpn_target(labels, T_VELO_2_CAM, feature_map_shape, anchors, cls='Car', coordinate='lidar'):
+def gt_boxes3d_to_yaw(batch_boxes):
+    # Input: (N, N', 10)
+    # Output: (N, N', 7)
+    print(f'prepare to convert into yaw:{batch_boxes}')
+    batch_boxes_yaw = []
+    for boxes in batch_boxes:
+        boxes_yaw = []
+        print(f'boxes:{boxes}')
+        for box in boxes:
+            print(f'box:{box.shape},{box}')
+
+            quaternion = box[6:10]
+            print(f'quaternion: {quaternion.shape}, {quaternion}')
+            yaw = mat_to_ang(quaternion)
+
+
+            box_yaw = np.hstack((box[0:6], yaw))
+            print(f'len of new box in yaw:{box_yaw.shape}')
+            boxes_yaw.append(box_yaw)
+
+        print(f'boxes:{len(boxes_yaw)}')
+        batch_boxes_yaw.append(np.array(boxes_yaw).reshape(-1, 7))
+
+    print(f'result batch boxes in yaw:{len(batch_boxes_yaw)}')
+
+    return batch_boxes_yaw
+
+def cal_rpn_target(labels, feature_map_shape, anchors, cls='Car', coordinate='lidar'):
     # Input:
     #   labels: (N, N')
     #   feature_map_shape: (w, l)
@@ -758,7 +796,8 @@ def cal_rpn_target(labels, T_VELO_2_CAM, feature_map_shape, anchors, cls='Car', 
     batch_gt_boxes3d = label_to_gt_box3d(labels, cls=cls)
 
     # projection gt_boxes3d from 10 dimension to 7 dimension (x y z h w l q0-3 -> x y z h w l r)
-    batch_gt_boxes3d = gt_boxes3d_to_yaw(batch_gt_boxes3d, T_VELO_2_CAM)
+    batch_gt_boxes3d = gt_boxes3d_to_yaw(batch_gt_boxes3d)
+    print('finish converting label box to xy plane.')
     # defined in eq(1) in 2.2
     anchors_reshaped = anchors.reshape(-1, 7)
     anchors_d = np.sqrt(anchors_reshaped[:, 4]**2 + anchors_reshaped[:, 5]**2)
