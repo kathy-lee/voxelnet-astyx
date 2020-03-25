@@ -572,7 +572,7 @@ def label_to_gt_box3d(labels, cls='Car'):
     #   coordinate: 'camera' or 'lidar'
     # Output:
     #   (N, N', 10)
-    print(f'raw labels:{labels}')
+    print(f'raw labels:{labels.shape}')
     boxes3d = []
     if cls == 'Car':
         acc_cls = ['Car']
@@ -588,15 +588,15 @@ def label_to_gt_box3d(labels, cls='Car'):
     for label in labels:
         boxes3d_a_label = []
         for row in label:
-            print(f'row:{row}')
+            #print(f'row:{row}')
             if row[10] in acc_cls or acc_cls == []:
                 box3d = row[0:10]
-                print(f'boxe3d:{box3d.shape}')
+                #print(f'boxe3d:{box3d.shape}')
                 boxes3d_a_label.append(box3d)
 
         boxes3d.append(np.array(boxes3d_a_label).reshape(-1, 10))
 
-    print(f'through label to gt box3d:{boxes3d}')
+    print(f'through label to gt box3d:{len(boxes3d)}')
     return boxes3d
 
 
