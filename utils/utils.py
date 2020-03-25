@@ -722,7 +722,7 @@ def gt_boxes3d_to_yaw(batch_boxes, T_VELO_2_CAM):
             center_point = box[0:3].T
             center_point = np.matmul(T_VELO_2_CAM.T, center_point)
 
-            quaternion = box[-3:-1]
+            quaternion = box[6:10]
             rotation_mat = quat_to_mat(quaternion)
             rotation_mat = np.matmul(T_VELO_2_CAM, rotation_mat)
             yaw = mat_to_ang(rotation_mat)
