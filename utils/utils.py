@@ -727,13 +727,13 @@ def gt_boxes3d_to_yaw(batch_boxes, T_VELO_2_CAM):
             rotation_mat = np.matmul(T_VELO_2_CAM.T, rotation_mat)
             yaw = mat_to_ang(rotation_mat)
 
-            box_yaw = np.vstack(center_point, box[3:6], yaw)
+            box_yaw = np.vstack((center_point, box[3:6], yaw))
             boxes_yaw.append(box_yaw)
 
         print(f'boxes:{len(boxes_yaw)}')
         batch_boxes_yaw.append(np.array(boxes_yaw).reshape(-1, 7))
 
-    print(f'batch boxes in yaw:{len(batch_boxes_yaw)}')
+    print(f'result batch boxes in yaw:{len(batch_boxes_yaw)}')
 
     return batch_boxes_yaw
 
