@@ -211,7 +211,7 @@ class Data_helper:
     dataset = dataset.padded_batch(batch_size, 
                                   padded_shapes = {
                                       "img" : [cfg.IMG_HEIGHT,cfg.IMG_WIDTH, cfg.IMG_CHANNEL] if mode!="train" else [],
-                                      "labels" : [None],
+                                      "labels" : [None, 11],
                                       "tag" : [],
                                       "feature_buffer" : [None, cfg.MAX_POINT_NUMBER, 7],
                                       "coordinate_buffer" : [None, 3],
@@ -226,7 +226,7 @@ class Data_helper:
                                       "neg_equal_one_sum" : [1,1,1] if mode in ["train", "eval", "sample_test"] else []
                                   }, padding_values = {
                                       'img' : 0.0,
-                                      'labels' : b"",
+                                      'labels' : 0.0,
                                       'tag' : b"",
                                       "feature_buffer" : 0.0,
                                       "coordinate_buffer" : 0,
