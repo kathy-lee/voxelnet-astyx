@@ -724,7 +724,7 @@ def gt_boxes3d_to_yaw(batch_boxes, T_VELO_2_CAM):
 
             quaternion = box[6:10]
             rotation_mat = quat_to_mat(quaternion)
-            rotation_mat = np.matmul(T_VELO_2_CAM, rotation_mat)
+            rotation_mat = np.matmul(T_VELO_2_CAM.T, rotation_mat)
             yaw = mat_to_ang(rotation_mat)
 
             box_yaw = np.vstack(center_point, box[3:6], yaw)
