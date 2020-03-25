@@ -718,6 +718,7 @@ def gt_boxes3d_to_yaw(batch_boxes, T_VELO_2_CAM):
     batch_boxes_yaw = []
     for boxes in batch_boxes:
         boxes_yaw = []
+        print(f'boxes:{boxes}')
         for box in boxes:
             center_point = box[0:3]
             center_point[:-1] = 1
