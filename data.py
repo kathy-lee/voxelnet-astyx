@@ -132,6 +132,19 @@ class Data_helper:
         dic["pos_equal_one_reg"], dic["pos_equal_one_sum"], dic["neg_equal_one_sum"] = 0,0,0
 
       print('finish one time fill queqe.')
+      print('yielded dic:')
+      print(f'{dic["labels"]}')
+      print(f'{dic["tag"]}')
+      print(f'{dic["feature_buffer"]}')
+      print(f'{dic["coordinate_buffer"]}')
+      print(f'{dic["number_buffer"]}')
+      print(f'{dic["num_points"]}')
+      print(f'{dic["pos_equal_one"]}')
+      print(f'{dic["neg_equal_one"]}')
+      print(f'{dic["targets"]}')
+      print(f'{dic["pos_equal_one_reg"]}')
+      print(f'{dic["pos_equal_one_sum"]}')
+      print(f'{dic["neg_equal_one_sum"]}')
       yield dic
       #self.ex_queue.put(dic)
 
