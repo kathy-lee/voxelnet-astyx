@@ -763,20 +763,20 @@ def gt_boxes3d_to_yaw(batch_boxes):
     batch_boxes_yaw = []
     for boxes in batch_boxes:
         boxes_yaw = []
-        print(f'boxes:{boxes}')
+        #print(f'boxes:{boxes}')
         for box in boxes:
-            print(f'box:{box.shape},{box}')
+            #print(f'box:{box.shape},{box}')
 
             quaternion = box[6:10]
-            print(f'quaternion: {quaternion.shape}, {quaternion}')
+            #print(f'quaternion: {quaternion.shape}')
             yaw = qaut_to_angle(quaternion)
 
 
             box_yaw = np.hstack((box[0:6], yaw))
-            print(f'len of new box in yaw:{box_yaw.shape}')
+            #print(f'len of new box in yaw:{box_yaw.shape}')
             boxes_yaw.append(box_yaw)
 
-        print(f'boxes:{len(boxes_yaw)}')
+        #print(f'boxes:{len(boxes_yaw)}')
         batch_boxes_yaw.append(np.array(boxes_yaw).reshape(-1, 7))
 
     print(f'result batch boxes in yaw:{len(batch_boxes_yaw)}')
