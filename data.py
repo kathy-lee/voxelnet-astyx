@@ -111,6 +111,7 @@ class Data_helper:
 
       if mode in ["train", "eval", "sample_test"]:
         _, Tr, _ = load_calib("%s/%06d.json" % (calib_dir,int(index)))
+        print(f'Tr:{Tr.shape}')
         dic["pos_equal_one"], dic["neg_equal_one"], dic["targets"]= cal_rpn_target(dic["labels"][np.newaxis, ...], Tr,
                                                                                       cfg.MAP_SHAPE , 
                                                                                       self.anchors, 

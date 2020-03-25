@@ -720,7 +720,6 @@ def gt_boxes3d_to_yaw(batch_boxes, T_VELO_2_CAM):
         boxes_yaw = []
         for box in boxes:
             center_point = box[0:3].T
-            print(f'dimension: {T_VELO_2_CAM.shape},{center_point.shape}')
             center_point = np.matmul(T_VELO_2_CAM, center_point)
 
             quaternion = box[-3:-1]
