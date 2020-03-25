@@ -721,9 +721,9 @@ def gt_boxes3d_to_yaw(batch_boxes, T_VELO_2_CAM):
         print(f'boxes:{boxes}')
         for box in boxes:
             print(f'box:{box.shape},{box}')
-            center_aug = np.insert(center_point, 3, values=1)
-            print(f'center point shape:{center_aug.shape},{center_aug}')
-            center_point = np.matmul(T_VELO_2_CAM, center_aug)
+            center_point = np.insert(box[0:3], 3, values=1)
+            print(f'center point shape:{center_point.shape},{center_point}')
+            center_point = np.matmul(T_VELO_2_CAM, center_point)
             print(f'center point shape:{center_point.shape}')
 
             quaternion = box[6:10]
