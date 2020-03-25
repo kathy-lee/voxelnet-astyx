@@ -721,7 +721,7 @@ def gt_boxes3d_to_yaw(batch_boxes, T_VELO_2_CAM):
         boxes_yaw = []
         for box in boxes:
             center_point = box[0:3]
-            center_point[:,:-1] = 1
+            center_point[:-1] = 1
             print(f'center point shape:{center_point.shape}')
             center_point = np.matmul(T_VELO_2_CAM, center_point)
             print(f'center point shape:{center_point.shape}')
