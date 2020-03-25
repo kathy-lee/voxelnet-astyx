@@ -283,7 +283,7 @@ def center_to_corner_box3d(boxes_center, coordinate='lidar', T_VELO_2_CAM=None, 
         box = boxes_center[i]
         translation = box[0:3]
         size = box[3:6]
-        quaternion = [0, 0, box[-1]]
+        yaw = box[6]
 
         w, l, h = size[0], size[1], size[2]
         trackletBox = np.array([
@@ -291,12 +291,13 @@ def center_to_corner_box3d(boxes_center, coordinate='lidar', T_VELO_2_CAM=None, 
             [l / 2, l / 2, -l / 2, -l / 2, l / 2, l / 2, -l / 2, -l / 2],\
             [h / 2, h / 2, h / 2, h / 2, -h / 2, -h / 2, -h / 2, -h / 2]])
         # rotate and translate 3d bounding box
-        R = quat_to_rotation(quaternion)
-        print(f'R:{R.shape}')
-        #bbox = np.dot(R, bbox)
-        #bbox = bbox + center[:, np.newaxis]
+        # rotMat = quat_to_rotation(quaternion)
+        rotMat = np.array([
+            [np.cos(yaw), -np.sin(yaw), 0.0],
+            [np.sin(yaw), np.cos(yaw), 0.0],
+            [0.0, 0.0, 1.0]])
 
-        cornerPosInVelo = np.dot(R, trackletBox) + np.tile(translation, (8, 1)).T
+        cornerPosInVelo = np.dot(rotMat, trackletBox) + np.tile(translation, (8, 1)).T
         box3d = cornerPosInVelo.transpose()
         ret[i] = box3d
 
@@ -950,8 +951,7 @@ def box_transform(boxes, tx, ty, tz, r=0, coordinate='lidar'):
     #   boxes: (N, 10) x y z h w l q0-3
     # Output:
     #   boxes: (N, 10) x y z h w l q0-3
-    boxes_corner = center_to_corner_box3d(
-        boxes, coordinate=coordinate)  # (N, 8, 3)
+    boxes_corner = center_to_corner_box3d(boxes, coordinate=coordinate)  # (N, 8, 3)
     for idx in range(len(boxes_corner)):
         if coordinate == 'lidar':
             boxes_corner[idx] = point_transform(
