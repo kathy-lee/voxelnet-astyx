@@ -720,6 +720,7 @@ def gt_boxes3d_to_yaw(batch_boxes, T_VELO_2_CAM):
         boxes_yaw = []
         for box in boxes:
             center_point = box[0:3].T
+            print(f'shape of matrix:{T_VELO_2_CAM.shape},{center_point}')
             center_point = np.matmul(T_VELO_2_CAM, center_point)
 
             quaternion = box[-3:-1]
@@ -749,6 +750,7 @@ def cal_rpn_target(labels, T_VELO_2_CAM, feature_map_shape, anchors, cls='Car', 
     # attention: cal IoU on birdview
     batch_size = labels.shape[0]
     batch_gt_boxes3d = label_to_gt_box3d(labels, cls=cls)
+
     # projection gt_boxes3d from 10 dimension to 7 dimension (x y z h w l q0-3 -> x y z h w l r)
     batch_gt_boxes3d = gt_boxes3d_to_yaw(batch_gt_boxes3d, T_VELO_2_CAM)
     # defined in eq(1) in 2.2
