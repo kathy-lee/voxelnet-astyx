@@ -137,7 +137,7 @@ class Data_helper:
       print(f'tag: {dic["tag"]}')
       print(f'feature_buffer: {dic["feature_buffer"].shape}')
       print(f'coordinate_buffer: {dic["coordinate_buffer"].shape}')
-      print(f'number_buffer: {dic["number_buffer"]}')
+      print(f'number_buffer: {dic["number_buffer"].shape}')
       print(f'num_points: {dic["num_points"]}')
       print(f'pos_equal_one: {dic["pos_equal_one"].shape}')
       print(f'neg_equal_one: {dic["neg_equal_one"].shape}')
