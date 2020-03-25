@@ -714,14 +714,13 @@ def mat_to_ang(R):
 def gt_boxes3d_to_yaw(batch_boxes, T_VELO_2_CAM):
     # Input: (N, N', 10)
     # Output: (N, N', 7)
-    print(f'raw batch boxes:{batch_boxes}')
+    print(f'prepare to convert into yaw:{batch_boxes}')
     batch_boxes_yaw = []
     for boxes in batch_boxes:
         boxes_yaw = []
         for box in boxes:
             center_point = box[0:3].T
-            print(f'shape of matrix:{T_VELO_2_CAM.shape},{center_point}')
-            center_point = np.matmul(T_VELO_2_CAM, center_point)
+            center_point = np.matmul(T_VELO_2_CAM.T, center_point)
 
             quaternion = box[-3:-1]
             rotation_mat = quat_to_mat(quaternion)
