@@ -768,7 +768,7 @@ def gt_boxes3d_to_yaw(batch_boxes):
 
             quaternion = box[6:10]
             print(f'quaternion: {quaternion.shape}, {quaternion}')
-            yaw = mat_to_ang(quaternion)
+            yaw = qaut_to_angle(quaternion)
 
 
             box_yaw = np.hstack((box[0:6], yaw))
