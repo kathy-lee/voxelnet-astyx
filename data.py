@@ -76,7 +76,7 @@ class Data_helper:
       sorted(self.tags)
     for index in self.tags:
       #index = next(self.tag_gen)
-      print(f'index:{index}*******************************')
+      print(f'begin fill examples queue.\nindex:{index}*******************************')
       dic = {}
       if is_aug_data:
         dic = aug_data(index, os.path.join(cfg.DATA_DIR, data_d))
@@ -131,7 +131,7 @@ class Data_helper:
         dic["pos_equal_one"], dic["neg_equal_one"], dic["targets"] = 0,0,0
         dic["pos_equal_one_reg"], dic["pos_equal_one_sum"], dic["neg_equal_one_sum"] = 0,0,0
 
-      print('finish one time fill queqe. The yielded dic:')
+      print('finish one time fill queqe. yielded dic.\n')
       # print(f'labels: {dic["labels"].shape}')
       # print(f'tag: {dic["tag"]}')
       # print(f'feature_buffer: {dic["feature_buffer"].shape}')

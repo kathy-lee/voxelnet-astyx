@@ -128,8 +128,7 @@ def load_calib(calib_dir):
     return T_toLidar, T_toCamera, K
 
 def get_class_id(classname):
-
-    classes = {'Bus': 0, 'Car':1, 'Cyclist': 2, 'Motorcyclist': 3, 'Person': 4, 'Trailer':5, 'Truck':6}
+    classes = {'Bus': 0, 'Car':1, 'Cyclist': 2, 'Motorcyclist': 3, 'Person': 4, 'Trailer':5, 'Truck':6, 'Towed Object': 5}
     return classes[classname]
 
 def load_label(label_dir):

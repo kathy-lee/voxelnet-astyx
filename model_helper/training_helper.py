@@ -41,14 +41,14 @@ def train_epochs( model, train_batcher, rand_test_batcher, val_batcher,  params,
   def distributed_train_step():
 
     batch = next(train_batcher)
-    print(batch["feature_buffer"].shape)
-    print(batch["coordinate_buffer"].shape)
-    print(batch["targets"].shape)
-    print(batch["pos_equal_one"].shape)
-    print(batch["pos_equal_one_reg"].shape)
-    print(batch["pos_equal_one_sum"].shape)
-    print(batch["neg_equal_one"].shape)
-    print(batch["neg_equal_one_sum"].shape)
+    # print(batch["feature_buffer"].shape)
+    # print(batch["coordinate_buffer"].shape)
+    # print(batch["targets"].shape)
+    # print(batch["pos_equal_one"].shape)
+    # print(batch["pos_equal_one_reg"].shape)
+    # print(batch["pos_equal_one_sum"].shape)
+    # print(batch["neg_equal_one"].shape)
+    # print(batch["neg_equal_one_sum"].shape)
     per_replica_losses = strategy.experimental_run_v2(model.train_step,
                                                       args=(batch["feature_buffer"], 
                                                             batch["coordinate_buffer"],
@@ -115,7 +115,7 @@ def train_epochs( model, train_batcher, rand_test_batcher, val_batcher,  params,
         t0 = time.time()
         losses = distributed_train_step()
         t1 = time.time() - t0
-        print('finish distributed train step.')
+        print('finish distributed train step, result:')
 
         print('train: {} @ epoch:{}/{} global_step:{} loss: {} reg_loss: {} cls_loss: {} cls_pos_loss: {} cls_neg_loss: {} batch time: {:.4f}'.format(step+1, epoch.numpy(), params["n_epochs"], ckpt.step.numpy(), colored('{:.4f}'.format(losses[0]), "red"), colored('{:.4f}'.format(losses[1]), "magenta"), colored('{:.4f}'.format(losses[2]), "yellow"), colored('{:.4f}'.format(losses[3]), "blue"), colored('{:.4f}'.format(losses[4]), "cyan"),  t1))
         with open('{}/train.txt'.format(logdir), 'a') as f:
@@ -125,7 +125,7 @@ def train_epochs( model, train_batcher, rand_test_batcher, val_batcher,  params,
           train_summary(summary_writer, list(losses)+[model.trainable_variables])
 
         if (step+1) % summary_val_interval == 0:
-          print("summary_val_interval now")
+          print("\nsummary_val_interval now")
 
           ret, batch = distributed_validate_step()
           val_summary(summary_writer, ret)
