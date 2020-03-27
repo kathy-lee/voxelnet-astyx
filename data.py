@@ -76,11 +76,11 @@ class Data_helper:
       sorted(self.tags)
     for index in self.tags:
       #index = next(self.tag_gen)
-      print(f'index:{index}')
+      print(f'index:{index}*******************************')
       dic = {}
       if is_aug_data:
         dic = aug_data(index, os.path.join(cfg.DATA_DIR, data_d))
-        print('finish data augumentation.')
+        print('finish data augumentation.\n')
       else:
         pc = np.fromfile("%s/%06d.bin" % (pc_dir, int(index)), dtype=np.float32).reshape(-1,4) 
         if mode == "test":
@@ -117,7 +117,7 @@ class Data_helper:
                                                                                       self.anchors, 
                                                                                       cfg.DETECT_OBJECT, 
                                                                                       'lidar')
-        print('finish rpn calculation.')
+        print('finish rpn calculation.\n')
 
         dic["pos_equal_one_reg"] = np.concatenate(
                 [np.tile( dic["pos_equal_one"][..., [0]], 7), np.tile( dic["pos_equal_one"][..., [1]], 7)], axis=-1)[0] #we index to 0 because we added a batch dimension
@@ -131,20 +131,19 @@ class Data_helper:
         dic["pos_equal_one"], dic["neg_equal_one"], dic["targets"] = 0,0,0
         dic["pos_equal_one_reg"], dic["pos_equal_one_sum"], dic["neg_equal_one_sum"] = 0,0,0
 
-      print('finish one time fill queqe.')
-      print('yielded dic:')
-      print(f'labels: {dic["labels"].shape}')
-      print(f'tag: {dic["tag"]}')
-      print(f'feature_buffer: {dic["feature_buffer"].shape}')
-      print(f'coordinate_buffer: {dic["coordinate_buffer"].shape}')
-      print(f'number_buffer: {dic["number_buffer"].shape}')
-      print(f'num_points: {dic["num_points"]}')
-      print(f'pos_equal_one: {dic["pos_equal_one"].shape}')
-      print(f'neg_equal_one: {dic["neg_equal_one"].shape}')
-      print(f'targets: {dic["targets"].shape}')
-      print(f'pos_equal_one_reg: {dic["pos_equal_one_reg"].shape}')
-      print(f'pos_equal_one_sum: {dic["pos_equal_one_sum"].shape}')
-      print(f'neg_equal_one_sum: {dic["neg_equal_one_sum"].shape}')
+      print('finish one time fill queqe. The yielded dic:')
+      # print(f'labels: {dic["labels"].shape}')
+      # print(f'tag: {dic["tag"]}')
+      # print(f'feature_buffer: {dic["feature_buffer"].shape}')
+      # print(f'coordinate_buffer: {dic["coordinate_buffer"].shape}')
+      # print(f'number_buffer: {dic["number_buffer"].shape}')
+      # print(f'num_points: {dic["num_points"]}')
+      # print(f'pos_equal_one: {dic["pos_equal_one"].shape}')
+      # print(f'neg_equal_one: {dic["neg_equal_one"].shape}')
+      # print(f'targets: {dic["targets"].shape}')
+      # print(f'pos_equal_one_reg: {dic["pos_equal_one_reg"].shape}')
+      # print(f'pos_equal_one_sum: {dic["pos_equal_one_sum"].shape}')
+      # print(f'neg_equal_one_sum: {dic["neg_equal_one_sum"].shape}\n')
       yield dic
       #self.ex_queue.put(dic)
 
