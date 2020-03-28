@@ -7,6 +7,7 @@ from utils.colorize import colorize
   
 
 def predict_step(model, batch, anchors, cfg, params, summary=False, vis=False):
+  print('\033[1;31mbegin predict step:\033[1;m')
 
   @tf.function
   def distributed_predict_step():
