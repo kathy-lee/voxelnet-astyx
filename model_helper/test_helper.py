@@ -7,7 +7,7 @@ from utils.colorize import colorize
   
 
 def predict_step(model, batch, anchors, cfg, params, summary=False, vis=False):
-  print('\033[1;31mbegin predict step:\033[1;m')
+  print('\033[1;31mbegin predict step:\033[')
 
   @tf.function
   def distributed_predict_step():
@@ -28,7 +28,7 @@ def predict_step(model, batch, anchors, cfg, params, summary=False, vis=False):
   batch_boxes3d = delta_to_boxes3d(deltas, anchors, coordinate='lidar')
   batch_boxes2d = batch_boxes3d[:, :, [0, 1, 4, 5, 6]]
   batch_probs = probs.reshape((params["batch_size"], -1))
-  print('before NMS.')
+  print('finish delta to boxes3d.')
 
   # NMS
   ret_box3d = []
@@ -42,6 +42,7 @@ def predict_step(model, batch, anchors, cfg, params, summary=False, vis=False):
     # TODO: if possible, use rotate NMS
     boxes2d = corner_to_standup_box2d(
         center_to_corner_box2d(tmp_boxes2d, coordinate='lidar')).astype(np.float32)
+    print('finish corner to standup box2d.')
     ind = tf.image.non_max_suppression(boxes2d, tmp_scores,max_output_size=cfg.RPN_NMS_POST_TOPK, iou_threshold=cfg.RPN_NMS_THRESH )
     ind = ind.numpy()
     tmp_boxes3d = tmp_boxes3d[ind, ...]

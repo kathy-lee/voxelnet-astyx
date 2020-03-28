@@ -571,7 +571,7 @@ def label_to_gt_box3d(labels, cls='Car'):
     #   coordinate: 'camera' or 'lidar'
     # Output:
     #   (N, N', 10)
-    print(f'raw labels:{labels.shape}')
+    #print(f'raw labels:{labels.shape}')
     boxes3d = []
     if cls == 'Car':
         acc_cls = ['Car']
@@ -758,7 +758,7 @@ def gt_boxes3d_to_yaw(batch_boxes, T_VELO_2_CAM):
 def gt_boxes3d_to_yaw(batch_boxes):
     # Input: (N, N', 10)
     # Output: (N, N', 7)
-    print(f'prepare to convert into yaw:{len(batch_boxes)}')
+    #print(f'prepare to convert into yaw:{len(batch_boxes)}')
     batch_boxes_yaw = []
     for boxes in batch_boxes:
         boxes_yaw = []
@@ -778,7 +778,7 @@ def gt_boxes3d_to_yaw(batch_boxes):
         #print(f'boxes:{len(boxes_yaw)}')
         batch_boxes_yaw.append(np.array(boxes_yaw).reshape(-1, 7))
 
-    print(f'result batch boxes in yaw:{len(batch_boxes_yaw)}')
+    #print(f'result batch boxes in yaw:{len(batch_boxes_yaw)}')
 
     return batch_boxes_yaw
 
