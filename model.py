@@ -291,7 +291,7 @@ class Model(tf.keras.Model):
                              pos_equal_one_sum,
                              neg_equal_one,
                              neg_equal_one_sum):
-    per_replica_losses = self.strategy.experimental_run_v2(self.train_step,
+    per_replica_losses = self.strategy.run(self.train_step,
                                                       args=(feature_buffer, 
                                                             coordinate_buffer,
                                                             targets, 
@@ -331,7 +331,7 @@ class Model(tf.keras.Model):
                             pos_equal_one_sum,
                             neg_equal_one,
                             neg_equal_one_sum):
-    per_replica_losses = self.strategy.experimental_run_v2(self.train_step,
+    per_replica_losses = self.strategy.run(self.train_step,
                                                     args=(feature_buffer, 
                                                           coordinate_buffer,
                                                           targets, 
