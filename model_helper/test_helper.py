@@ -20,6 +20,7 @@ def predict_step(model, batch, anchors, cfg, params, summary=False, vis=False):
   print('predict', tag)
 
   res = distributed_predict_step()
+  print(f'res:{res}')
   print('1. finish distributed predict step.')
   if model.strategy.num_replicas_in_sync > 1:
     probs, deltas = tf.concat(res[0].values, axis=0).numpy(), tf.concat(res[1].values, axis=0).numpy()
@@ -54,8 +55,10 @@ def predict_step(model, batch, anchors, cfg, params, summary=False, vis=False):
   ret_box3d_score = []
   print(f'ret_box3d:{len(ret_box3d)}, ret_score:{len(ret_score)}')
   for boxes3d, scores in zip(ret_box3d, ret_score):
-    ret_box3d_score.append(np.concatenate([np.tile(cfg.DETECT_OBJECT, len(boxes3d))[:, np.newaxis],
-                                                boxes3d, scores[:, np.newaxis]], axis=-1))
+    ret_box3d_score.append(np.concatenate([np.tile(cfg.DETECT_OBJECT, len(boxes3d))[:, np.newaxis],boxes3d, scores[:, np.newaxis]], axis=-1))
+    print(np.tile(cfg.DETECT_OBJECT, len(boxes3d))[:, np.newaxis])
+    print(boxes3d)
+    print(scores[:, np.newaxis])
     print('finish one substep in 5.')
   print(f'finish NMS.summary:{summmary},vis:{vis}')
 
