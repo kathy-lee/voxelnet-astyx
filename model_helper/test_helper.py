@@ -24,10 +24,10 @@ def predict_step(model, batch, anchors, cfg, params, summary=False, vis=False):
     probs, deltas = tf.concat(res[0].values, axis=0).numpy(), tf.concat(res[1].values, axis=0).numpy()
   else:
     probs, deltas = res[0].numpy(), res[1].numpy()
-  batch_boxes3d = delta_to_boxes3d(
-        deltas, anchors, coordinate='lidar')
+  batch_boxes3d = delta_to_boxes3d(deltas, anchors, coordinate='lidar')
   batch_boxes2d = batch_boxes3d[:, :, [0, 1, 4, 5, 6]]
   batch_probs = probs.reshape((params["batch_size"], -1))
+  print('before NMS.')
 
   # NMS
   ret_box3d = []
