@@ -52,9 +52,11 @@ def predict_step(model, batch, anchors, cfg, params, summary=False, vis=False):
     print('4. finish non max suppression.')
 
   ret_box3d_score = []
+  print(f'ret_box3d:{len(ret_box3d), ret_score:{len(ret_score)}')
   for boxes3d, scores in zip(ret_box3d, ret_score):
     ret_box3d_score.append(np.concatenate([np.tile(cfg.DETECT_OBJECT, len(boxes3d))[:, np.newaxis],
                                                 boxes3d, scores[:, np.newaxis]], axis=-1))
+    print('finish one substep in 5.')
   print(f'finish NMS.summary:{summmary},vis:{vis}')
 
   img = 255. * batch["img"].numpy() #tensorflow scales the image between 0 and 1 when reading it, we need to rescale it between 0 and 255
