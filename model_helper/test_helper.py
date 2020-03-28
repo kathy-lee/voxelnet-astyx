@@ -52,7 +52,7 @@ def predict_step(model, batch, anchors, cfg, params, summary=False, vis=False):
   for boxes3d, scores in zip(ret_box3d, ret_score):
     ret_box3d_score.append(np.concatenate([np.tile(cfg.DETECT_OBJECT, len(boxes3d))[:, np.newaxis],
                                                 boxes3d, scores[:, np.newaxis]], axis=-1))
-  print('finish NMS.')
+  print(f'finish NMS.summary:{summmary},vis:{vis}')
 
   img = 255. * batch["img"].numpy() #tensorflow scales the image between 0 and 1 when reading it, we need to rescale it between 0 and 255
   if summary:
@@ -62,7 +62,8 @@ def predict_step(model, batch, anchors, cfg, params, summary=False, vis=False):
 
     front_image = draw_lidar_box3d_on_image(img[0], ret_box3d[0], ret_score[0],
                                                   batch_gt_boxes3d[0], P2=P, T_VELO_2_CAM=Tr)
-          
+    print('finish drawing prediction on image.')
+
     n_points = batch["num_points"][0].numpy()
     lidar = batch["lidar"][0][0:n_points,].numpy()
     bird_view = lidar_to_bird_view_img(lidar, factor=cfg.BV_LOG_FACTOR)

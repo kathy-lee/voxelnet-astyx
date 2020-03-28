@@ -435,7 +435,7 @@ def lidar_box3d_to_camera_box(boxes3d, cal_projection=False, P2 = None, T_VELO_2
 
     for n in range(num):
         box3d = lidar_boxes3d_corner[n]
-        box3d = lidar_to_camera_point(box3d, T_VELO_2_CAM)
+        #box3d = lidar_to_camera_point(box3d, T_VELO_2_CAM)
         points = np.hstack((box3d, np.ones((8, 1)))).T  # (8, 4) -> (4, 8)
         points = np.matmul(P2, points).T
         points[:, 0] /= points[:, 2]
@@ -479,9 +479,9 @@ def draw_lidar_box3d_on_image(img, boxes3d, scores, gt_boxes3d=np.array([]),
                               color=(0, 255, 255), gt_color=(255, 0, 255), thickness=1, P2 = None, T_VELO_2_CAM=None):
     # Input:
     #   img: (h, w, 3)
-    #   boxes3d (N, 7) [x, y, z, h, w, l, r]
+    #   boxes3d (N, 10) [x, y, z, h, w, l, q0-q3]
     #   scores
-    #   gt_boxes3d (N, 7) [x, y, z, h, w, l, r]
+    #   gt_boxes3d (N, 7) [x, y, z, h, w, l, q0-q3]
     img = img.copy()
     projections = lidar_box3d_to_camera_box(boxes3d, cal_projection=True, P2=P2, T_VELO_2_CAM=T_VELO_2_CAM)
     gt_projections = lidar_box3d_to_camera_box(gt_boxes3d, cal_projection=True, P2=P2, T_VELO_2_CAM=T_VELO_2_CAM)
