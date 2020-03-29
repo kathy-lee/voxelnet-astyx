@@ -254,7 +254,8 @@ class Data_helper:
     if type(strategy) != type(None):
       print("Distributed dataset !")
       dataset = strategy.experimental_distribute_dataset(dataset)
-    
+
+    print('create batch.')
     return dataset
 
 
