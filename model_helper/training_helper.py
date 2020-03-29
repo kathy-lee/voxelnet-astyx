@@ -5,6 +5,7 @@ import tensorflow as tf
 from termcolor import colored
 import os
 import cv2
+import traceback
 
 from model_helper.test_helper import predict_step
 
@@ -135,6 +136,7 @@ def train_epochs( model, train_batcher, rand_test_batcher, val_batcher,  params,
             ret = predict_step( model, batch, train_batcher.anchors, cfg, params, summary=True)
             pred_summary(summary_writer, ret)
           except Exception as ex:
+            print("".join(traceback.TracebackException.from_exception(ex).format()))
             print(f"prediction skipped due to error: {str(ex)}")
 
         if (step+1) % summary_flush_interval==0:
