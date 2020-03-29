@@ -40,8 +40,7 @@ def predict_step(model, batch, anchors, cfg, params, summary=False, vis=False):
     tmp_boxes2d = batch_boxes2d[batch_id, ind, ...]
     tmp_scores = batch_probs[batch_id, ind].astype(np.float32)
     # TODO: if possible, use rotate NMS
-    boxes2d = corner_to_standup_box2d(
-        center_to_corner_box2d(tmp_boxes2d, coordinate='lidar')).astype(np.float32)
+    boxes2d = corner_to_standup_box2d(center_to_corner_box2d(tmp_boxes2d, coordinate='lidar')).astype(np.float32)
     #print('3. finish corner to standup box2d.')
     ind = tf.image.non_max_suppression(boxes2d, tmp_scores,max_output_size=cfg.RPN_NMS_POST_TOPK, iou_threshold=cfg.RPN_NMS_THRESH )
     ind = ind.numpy()

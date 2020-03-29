@@ -23,8 +23,7 @@ def aug_data(tag, object_dir):
     if choice <= -1: #disabled
         # disable this augmention here. current implementation will decrease the performances
         lidar_center_gt_box3d = camera_to_lidar_box(gt_box3d)
-        lidar_corner_gt_box3d = center_to_corner_box3d(
-            lidar_center_gt_box3d, coordinate='lidar')
+        lidar_corner_gt_box3d = center_to_corner_box3d(lidar_center_gt_box3d, coordinate='lidar')
         for idx in range(len(lidar_corner_gt_box3d)):
             # TODO: precisely gather the point
             is_collision = True

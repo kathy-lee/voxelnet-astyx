@@ -263,8 +263,7 @@ def center_to_corner_box2d(boxes_center, coordinate='lidar', T_VELO_2_CAM=None, 
     N = boxes_center.shape[0]
     boxes3d_center = np.zeros((N, 7))
     boxes3d_center[:, [0, 1, 4, 5, 6]] = boxes_center
-    boxes3d_corner = center_to_corner_box3d(
-        boxes3d_center, coordinate=coordinate, T_VELO_2_CAM=T_VELO_2_CAM, R_RECT_0=R_RECT_0)
+    boxes3d_corner = center_to_corner_box3d(boxes3d_center, coordinate=coordinate, T_VELO_2_CAM=T_VELO_2_CAM, R_RECT_0=R_RECT_0)
 
     return boxes3d_corner[:, 0:4, 0:2]
 
@@ -282,7 +281,8 @@ def center_to_corner_box3d(boxes_center, coordinate='lidar', T_VELO_2_CAM=None, 
         box = boxes_center[i]
         translation = box[0:3]
         size = box[3:6]
-        yaw = box[6]
+        quaternion = box[6:10]
+        #yaw = box[6]
 
         w, l, h = size[0], size[1], size[2]
         trackletBox = np.array([
@@ -290,11 +290,11 @@ def center_to_corner_box3d(boxes_center, coordinate='lidar', T_VELO_2_CAM=None, 
             [l / 2, l / 2, -l / 2, -l / 2, l / 2, l / 2, -l / 2, -l / 2],\
             [h / 2, h / 2, h / 2, h / 2, -h / 2, -h / 2, -h / 2, -h / 2]])
         # rotate and translate 3d bounding box
-        # rotMat = quat_to_rotation(quaternion)
-        rotMat = np.array([
-            [np.cos(yaw), -np.sin(yaw), 0.0],
-            [np.sin(yaw), np.cos(yaw), 0.0],
-            [0.0, 0.0, 1.0]])
+        rotMat = quat_to_rotation(quaternion)
+        # rotMat = np.array([
+        #     [np.cos(yaw), -np.sin(yaw), 0.0],
+        #     [np.sin(yaw), np.cos(yaw), 0.0],
+        #     [0.0, 0.0, 1.0]])
 
         cornerPosInVelo = np.dot(rotMat, trackletBox) + np.tile(translation, (8, 1)).T
         box3d = cornerPosInVelo.transpose()
@@ -424,7 +424,7 @@ def corner_to_center_box3d(boxes_corner, coordinate='camera', T_VELO_2_CAM=None,
     return np.array(ret)
 
 
-# this just for visulize and testing
+# this just for visualize and testing
 def lidar_box3d_to_camera_box(boxes3d, cal_projection=False, P2 = None, T_VELO_2_CAM=None):
     # (N, 10) -> (N, 4)/(N, 8, 2)  x,y,z,h,w,l,q0-q3 -> x1,y1,x2,y2/8*(x, y)
     num = len(boxes3d)
@@ -435,10 +435,10 @@ def lidar_box3d_to_camera_box(boxes3d, cal_projection=False, P2 = None, T_VELO_2
 
     for n in range(num):
         box3d = lidar_boxes3d_corner[n].T
-        #box3d = lidar_to_camera_point(box3d, T_VELO_2_CAM)
+        box3d = lidar_to_camera_point(box3d, T_VELO_2_CAM)
         #points = np.hstack((box3d, np.ones((8, 1)))).T  # (8, 4) -> (4, 8)
         points = np.matmul(P2, box3d).T
-        print(f'P2:{P2},box3d:{box3d},points:{points}')
+        print(f'box3d:{box3d},points:{points}')
         points[:, 0] /= points[:, 2]
         points[:, 1] /= points[:, 2]
 
