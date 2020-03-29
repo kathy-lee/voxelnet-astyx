@@ -65,7 +65,7 @@ def predict_step(model, batch, anchors, cfg, params, summary=False, vis=False):
   if summary:
     # only summary 1 in a batch
     cur_tag = tag[0]
-    _, Tr, P = load_calib(os.path.join(cfg.CALIB_DIR, cur_tag + '.txt'))
+    _, Tr, P = load_calib(os.path.join(cfg.CALIB_DIR, cur_tag + '.json'))
 
     front_image = draw_lidar_box3d_on_image(img[0], ret_box3d[0], ret_score[0],
                                                   batch_gt_boxes3d[0], P2=P, T_VELO_2_CAM=Tr)
