@@ -20,7 +20,7 @@ def predict_step(model, batch, anchors, cfg, params, summary=False, vis=False):
   print('predict', tag)
 
   res = distributed_predict_step()
-  print('1. finish distributed predict step.')
+  #print('1. finish distributed predict step.')
   if model.strategy.num_replicas_in_sync > 1:
     probs, deltas = tf.concat(res[0].values, axis=0).numpy(), tf.concat(res[1].values, axis=0).numpy()
   else:
@@ -28,7 +28,7 @@ def predict_step(model, batch, anchors, cfg, params, summary=False, vis=False):
   batch_boxes3d = delta_to_boxes3d(deltas, anchors, coordinate='lidar')
   batch_boxes2d = batch_boxes3d[:, :, [0, 1, 4, 5, 6]]
   batch_probs = probs.reshape((params["batch_size"], -1))
-  print('2. finish delta to boxes3d.')
+  #print('2. finish delta to boxes3d.')
 
   # NMS
   ret_box3d = []
@@ -42,24 +42,30 @@ def predict_step(model, batch, anchors, cfg, params, summary=False, vis=False):
     # TODO: if possible, use rotate NMS
     boxes2d = corner_to_standup_box2d(
         center_to_corner_box2d(tmp_boxes2d, coordinate='lidar')).astype(np.float32)
-    print('3. finish corner to standup box2d.')
+    #print('3. finish corner to standup box2d.')
     ind = tf.image.non_max_suppression(boxes2d, tmp_scores,max_output_size=cfg.RPN_NMS_POST_TOPK, iou_threshold=cfg.RPN_NMS_THRESH )
     ind = ind.numpy()
     tmp_boxes3d = tmp_boxes3d[ind, ...]
     tmp_scores = tmp_scores[ind]
     ret_box3d.append(tmp_boxes3d)
     ret_score.append(tmp_scores)
-    print('4. finish non max suppression.')
+    #print('4. finish non max suppression.')
 
   ret_box3d_score = []
   print(f'ret_box3d:{len(ret_box3d)}, ret_score:{len(ret_score)}')
   for boxes3d, scores in zip(ret_box3d, ret_score):
-    ret_box3d_score.append(np.concatenate([np.tile(cfg.DETECT_OBJECT, len(boxes3d))[:, np.newaxis],boxes3d, scores[:, np.newaxis]], axis=-1))
-    print(np.tile(cfg.DETECT_OBJECT, len(boxes3d))[:, np.newaxis])
-    print(boxes3d)
-    print(scores[:, np.newaxis])
-    print('finish one substep in 5.')
-  print(f'finish NMS.summary:{summary},vis:{vis}')
+    ret_box3d_score.append(np.concatenate(
+        [
+            np.tile(cfg.DETECT_OBJECT, len(boxes3d))[:, np.newaxis],
+            boxes3d,
+            scores[:, np.newaxis]
+        ],
+        axis=-1
+    ))
+  #   print(np.tile(cfg.DETECT_OBJECT, len(boxes3d))[:, np.newaxis])
+  #   print(boxes3d)
+  #   print(scores[:, np.newaxis])
+  # print(f'finish NMS.summary:{summary},vis:{vis}')
 
   img = 255. * batch["img"].numpy() #tensorflow scales the image between 0 and 1 when reading it, we need to rescale it between 0 and 255
   if summary:
