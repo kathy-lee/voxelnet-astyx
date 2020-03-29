@@ -128,7 +128,7 @@ def train_epochs( model, train_batcher, rand_test_batcher, val_batcher,  params,
           train_summary(summary_writer, list(losses)+[model.trainable_variables])
 
         if (step+1) % summary_val_interval == 0:
-          print("\nsummary_val_interval now")
+          print("summary_val_interval now")
 
           ret, batch = distributed_validate_step()
           val_summary(summary_writer, ret)

@@ -80,7 +80,7 @@ class Data_helper:
       dic = {}
       if is_aug_data:
         dic = aug_data(index, os.path.join(cfg.DATA_DIR, data_d))
-        print('finish data augumentation.\n')
+        print('finish data augumentation.')
       else:
         pc = np.fromfile("%s/%06d.bin" % (pc_dir, int(index)), dtype=np.float32).reshape(-1,4) 
         if mode == "test":
