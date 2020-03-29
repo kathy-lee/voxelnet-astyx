@@ -173,6 +173,7 @@ class Data_helper:
 
 
   def batch_dataset(self, batch_size, mode , is_aug_data, buffer_size, cfg, strategy):
+    print('creating batch.')
     dataset = tf.data.Dataset.from_generator(lambda: self.fill_examples_queue(self.cfg, mode,is_aug_data), 
                                             output_types={
                                                 "img" : tf.float32,
@@ -255,7 +256,7 @@ class Data_helper:
       print("Distributed dataset !")
       dataset = strategy.experimental_distribute_dataset(dataset)
 
-    print('create batch.')
+    print('created batch.')
     return dataset
 
 
