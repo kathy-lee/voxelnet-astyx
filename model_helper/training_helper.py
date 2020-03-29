@@ -64,6 +64,7 @@ def train_epochs( model, train_batcher, rand_test_batcher, val_batcher,  params,
 
   @tf.function
   def distributed_validate_step():
+    print('start dis vali step.')
     batch = next(rand_test_batcher)
     print(f'dis vali step. batch:{batch}')
     per_replica_losses = strategy.run(model.train_step,
@@ -133,8 +134,8 @@ def train_epochs( model, train_batcher, rand_test_batcher, val_batcher,  params,
           try:
             ret = predict_step( model, batch, train_batcher.anchors, cfg, params, summary=True)
             pred_summary(summary_writer, ret)
-          except:
-            print("prediction skipped due to error")
+          except Exception as ex:
+            print(f"prediction skipped due to error: {str(ex)}")
 
         if (step+1) % summary_flush_interval==0:
           summary_writer.flush()

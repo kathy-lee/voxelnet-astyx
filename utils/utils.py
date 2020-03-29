@@ -595,7 +595,7 @@ def label_to_gt_box3d(labels, cls='Car'):
 
         boxes3d.append(np.array(boxes3d_a_label).reshape(-1, 10))
 
-    print(f'through label to gt box3d:{len(boxes3d)}')
+    #print(f'through label to gt box3d:{len(boxes3d)}')
     return boxes3d
 
 
