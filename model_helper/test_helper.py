@@ -59,7 +59,7 @@ def predict_step(model, batch, anchors, cfg, params, summary=False, vis=False):
     print(boxes3d)
     print(scores[:, np.newaxis])
     print('finish one substep in 5.')
-  print(f'finish NMS.summary:{summmary},vis:{vis}')
+  print(f'finish NMS.summary:{summary},vis:{vis}')
 
   img = 255. * batch["img"].numpy() #tensorflow scales the image between 0 and 1 when reading it, we need to rescale it between 0 and 255
   if summary:
