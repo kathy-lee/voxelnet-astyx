@@ -61,7 +61,7 @@ def predict_step(model, batch, anchors, cfg, params, summary=False, vis=False):
         ],
         axis=-1
     ))
-  print(f'scores:{ret_box3d_score}')
+
   #   print(np.tile(cfg.DETECT_OBJECT, len(boxes3d))[:, np.newaxis])
   #   print(boxes3d)
   #   print(scores[:, np.newaxis])
@@ -85,6 +85,7 @@ def predict_step(model, batch, anchors, cfg, params, summary=False, vis=False):
                                                     batch_gt_boxes3d[0], factor=cfg.BV_LOG_FACTOR, P2=P, T_VELO_2_CAM=Tr)
 
     heatmap = colorize(probs[0, ...], cfg.BV_LOG_FACTOR)
+    print(tag)
     return {"tag":tag, "scores":ret_box3d_score, "front_image":tf.expand_dims(front_image, axis=0), 
             "bird_view":tf.expand_dims(bird_view, axis=0), "heatmap":tf.expand_dims(heatmap, axis=0)}
 
