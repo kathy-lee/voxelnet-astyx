@@ -272,6 +272,7 @@ def center_to_corner_box2d(boxes_center, coordinate='lidar', T_VELO_2_CAM=None, 
 
 def center_to_corner_box3d(boxes_center, coordinate='lidar', T_VELO_2_CAM=None, R_RECT_0=None):
     # (N, 10) -> (N, 8, 3)
+    # (N, 7) -> (N, 8, 3)
 
     N = boxes_center.shape[0]
     ret = np.zeros((N, 8, 3), dtype=np.float32)
@@ -283,9 +284,6 @@ def center_to_corner_box3d(boxes_center, coordinate='lidar', T_VELO_2_CAM=None, 
         box = boxes_center[i]
         translation = box[0:3]
         size = box[3:6]
-        quaternion = box[6:10]
-        #yaw = box[6]
-        print(f'translation:{translation},size:{size},quaternion:{quaternion}.')
 
         w, l, h = size[0], size[1], size[2]
         trackletBox = np.array([
@@ -293,11 +291,15 @@ def center_to_corner_box3d(boxes_center, coordinate='lidar', T_VELO_2_CAM=None, 
             [l / 2, l / 2, -l / 2, -l / 2, l / 2, l / 2, -l / 2, -l / 2],\
             [h / 2, h / 2, h / 2, h / 2, -h / 2, -h / 2, -h / 2, -h / 2]])
         # rotate and translate 3d bounding box
-        rotMat = quat_to_rotation(quaternion)
-        # rotMat = np.array([
-        #     [np.cos(yaw), -np.sin(yaw), 0.0],
-        #     [np.sin(yaw), np.cos(yaw), 0.0],
-        #     [0.0, 0.0, 1.0]])
+        if box.shape[0] == 10:
+            quaternion = box[6:10]
+            rotMat = quat_to_rotation(quaternion)
+        else:
+            yaw = box[6]
+            rotMat = np.array([
+              [np.cos(yaw), -np.sin(yaw), 0.0],
+              [np.sin(yaw), np.cos(yaw), 0.0],
+              [0.0, 0.0, 1.0]])
 
         cornerPosInVelo = np.dot(rotMat, trackletBox) + np.tile(translation, (8, 1)).T
         box3d = cornerPosInVelo.transpose()
@@ -784,6 +786,7 @@ def gt_boxes3d_to_yaw(batch_boxes):
     #print(f'result batch boxes in yaw:{len(batch_boxes_yaw)}')
 
     return batch_boxes_yaw
+
 
 def cal_rpn_target(labels, feature_map_shape, anchors, cls='Car', coordinate='lidar'):
     # Input:
