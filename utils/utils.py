@@ -602,7 +602,7 @@ def label_to_gt_box3d(labels, cls='Car'):
     return boxes3d
 
 
-def box3d_to_label(batch_box3d, batch_cls, batch_score=[], tag, coordinate='camera', P2 = None, T_VELO_2_CAM=None, R_RECT_0=None):
+def box3d_to_label(tag, batch_box3d, batch_cls, batch_score=[], coordinate='camera', P2 = None, T_VELO_2_CAM=None, R_RECT_0=None):
     # Input:
     #   (N, N', 7) x y z h w l r
     #   (N, N')
