@@ -440,7 +440,7 @@ def lidar_box3d_to_camera_box(boxes3d, cal_projection=False, P2 = None, T_VELO_2
         box3d = lidar_boxes3d_corner[n]
         box3d = lidar_to_camera_point(box3d, T_VELO_2_CAM)
         #points = np.hstack((box3d, np.ones((8, 1)))).T  # (8, 4) -> (4, 8)
-        points = np.matmul(P2, box3d.T).T
+        points = np.matmul(P2, box3d).T
         print(f'box3d:{box3d.shape},points:{points.shape}')
         points[:, 0] /= points[:, 2]
         points[:, 1] /= points[:, 2]
