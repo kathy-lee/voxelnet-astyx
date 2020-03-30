@@ -602,7 +602,7 @@ def label_to_gt_box3d(labels, cls='Car'):
     return boxes3d
 
 
-def box3d_to_label(batch_box3d, batch_cls, batch_score=[], coordinate='camera', P2 = None, T_VELO_2_CAM=None, R_RECT_0=None):
+def box3d_to_label(batch_box3d, batch_cls, batch_score=[], tag, coordinate='camera', P2 = None, T_VELO_2_CAM=None, R_RECT_0=None):
     # Input:
     #   (N, N', 7) x y z h w l r
     #   (N, N')
@@ -611,6 +611,9 @@ def box3d_to_label(batch_box3d, batch_cls, batch_score=[], coordinate='camera', 
     # Output:
     #   label: (N, N') N batches and N lines
     batch_label = []
+    calib_dir = "{}/{}/calibration".format(cfg.DATA_DIR, 'validation')
+    _, Tr, _ = load_calib(os.path.join(calib_dir, tag))
+
     if batch_score:
         template = '{} ' + ' '.join(['{:.4f}' for i in range(15)]) + '\n'
         for boxes, scores, clses in zip(batch_box3d, batch_score, batch_cls):

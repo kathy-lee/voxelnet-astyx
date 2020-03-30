@@ -169,7 +169,7 @@ def train_epochs( model, train_batcher, rand_test_batcher, val_batcher,  params,
           for tag, result in zip(tags, results):
             of_path = os.path.join(dump_test_logdir, str(epoch.numpy()), 'data', tag + '.txt')
             with open(of_path, 'w+') as f:
-              labels = box3d_to_label([result[:, 1:8]], [result[:, 0]], [result[:, -1]], coordinate='lidar')[0]
+              labels = box3d_to_label([result[:, 1:8]], [result[:, 0]], [result[:, -1]], tag, coordinate='lidar')[0]
               for line in labels:
                 f.write(line)
               print('write out {} objects to {}'.format(len(labels), tag))
