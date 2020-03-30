@@ -7,7 +7,7 @@ from utils.colorize import colorize
   
 
 def predict_step(model, batch, anchors, cfg, params, summary=False, vis=False):
-  print('\033[1;31mbegin predict step:\033[')
+  print('\033[1;31mbegin predict step:\033[', end = '')
 
   @tf.function
   def distributed_predict_step():
@@ -17,7 +17,7 @@ def predict_step(model, batch, anchors, cfg, params, summary=False, vis=False):
 
   if summary or vis:
     batch_gt_boxes3d = label_to_gt_box3d(batch["labels"], cls=cfg.DETECT_OBJECT)
-  print('predict', tag)
+  print('predict', tag, end = '')
 
   res = distributed_predict_step()
   #print('1. finish distributed predict step.')
@@ -61,6 +61,7 @@ def predict_step(model, batch, anchors, cfg, params, summary=False, vis=False):
         ],
         axis=-1
     ))
+  print(f'scores:{ret_box3d_score}')
   #   print(np.tile(cfg.DETECT_OBJECT, len(boxes3d))[:, np.newaxis])
   #   print(boxes3d)
   #   print(scores[:, np.newaxis])
