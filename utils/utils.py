@@ -227,7 +227,7 @@ def camera_to_lidar_point(points, T_VELO_2_CAM=None, R_RECT_0=None):
 
 
 def lidar_to_camera_point(points, T_VELO_2_CAM=None):
-    # (N, 3) -> (N, 3)
+    # (N, 3) -> (3, N)
     N = points.shape[0]
     points = np.hstack([points, np.ones((N, 1))]).T
 
@@ -441,7 +441,6 @@ def lidar_box3d_to_camera_box(boxes3d, cal_projection=False, P2 = None, T_VELO_2
         box3d = lidar_to_camera_point(box3d, T_VELO_2_CAM)
         #points = np.hstack((box3d, np.ones((8, 1)))).T  # (8, 4) -> (4, 8)
         points = np.matmul(P2, box3d).T
-        print(f'box3d:{box3d.shape},points:{points.shape}')
         points[:, 0] /= points[:, 2]
         points[:, 1] /= points[:, 2]
 
@@ -802,7 +801,7 @@ def cal_rpn_target(labels, feature_map_shape, anchors, cls='Car', coordinate='li
 
     # projection gt_boxes3d from 10 dimension to 7 dimension (x y z h w l q0-3 -> x y z h w l r)
     batch_gt_boxes3d = gt_boxes3d_to_yaw(batch_gt_boxes3d)
-    print('finish converting label box to xy plane.')
+    #print('finish converting label box to xy plane.')
     # defined in eq(1) in 2.2
     anchors_reshaped = anchors.reshape(-1, 7)
     anchors_d = np.sqrt(anchors_reshaped[:, 4]**2 + anchors_reshaped[:, 5]**2)
