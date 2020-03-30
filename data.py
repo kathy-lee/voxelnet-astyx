@@ -76,7 +76,7 @@ class Data_helper:
       sorted(self.tags)
     for index in self.tags:
       #index = next(self.tag_gen)
-      print(f'begin fill examples queue:\nindex:{index}',end = '')
+      print(f'begin fill examples queue: index:{index}.',end = '')
       dic = {}
       if is_aug_data:
         dic = aug_data(index, os.path.join(cfg.DATA_DIR, data_d))
