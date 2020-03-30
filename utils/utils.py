@@ -82,6 +82,8 @@ def inv_trans(T):
     return Q
 
 def quat_to_rotation(quat):
+    # input: (4, 1)
+    # output: (4, 4)
     m = np.sum(np.multiply(quat, quat))
     q = quat.copy()
     q = np.array(q)
@@ -283,6 +285,7 @@ def center_to_corner_box3d(boxes_center, coordinate='lidar', T_VELO_2_CAM=None, 
         size = box[3:6]
         quaternion = box[6:10]
         #yaw = box[6]
+        print(f'translation:{translation},size:{size},quaternion:{quaternion}.')
 
         w, l, h = size[0], size[1], size[2]
         trackletBox = np.array([
@@ -312,8 +315,7 @@ def corner_to_center_box2d(boxes_corner, coordinate='lidar', T_VELO_2_CAM=None, 
     boxes3d_corner = np.zeros((N, 8, 3))
     boxes3d_corner[:, 0:4, 0:2] = boxes_corner
     boxes3d_corner[:, 4:8, 0:2] = boxes_corner
-    boxes3d_center = corner_to_center_box3d(
-        boxes3d_corner, coordinate=coordinate, T_VELO_2_CAM=T_VELO_2_CAM, R_RECT_0=R_RECT_0)
+    boxes3d_center = corner_to_center_box3d(boxes3d_corner, coordinate=coordinate, T_VELO_2_CAM=T_VELO_2_CAM, R_RECT_0=R_RECT_0)
 
     return boxes3d_center[:, [0, 1, 4, 5, 6]]
 
