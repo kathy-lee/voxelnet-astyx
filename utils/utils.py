@@ -436,7 +436,7 @@ def lidar_box3d_to_camera_box(boxes3d, cal_projection=False, P2 = None, T_VELO_2
     projections = np.zeros((num, 8, 2), dtype=np.float32)
 
     lidar_boxes3d_corner = center_to_corner_box3d(boxes3d, coordinate='lidar', T_VELO_2_CAM=T_VELO_2_CAM)
-    print(lidar_boxes3d_corner)
+    print(lidar_boxes3d_corner.shape)
     for n in range(num):
         box3d = lidar_boxes3d_corner[n]
         box3d = lidar_to_camera_point(box3d, T_VELO_2_CAM)
