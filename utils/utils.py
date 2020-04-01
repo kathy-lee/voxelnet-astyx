@@ -292,7 +292,6 @@ def center_to_corner_box3d(boxes_center, coordinate='lidar', T_VELO_2_CAM=None, 
             [l / 2, l / 2, -l / 2, -l / 2, l / 2, l / 2, -l / 2, -l / 2],\
             [h / 2, h / 2, h / 2, h / 2, -h / 2, -h / 2, -h / 2, -h / 2]])
         # rotate and translate 3d bounding box
-        print(f'shape:{box.shape[0]}')
         if box.shape[0] == 10:
             print(f'dim:{w},{l},{h}')
             quaternion = box[6:10]
@@ -308,7 +307,7 @@ def center_to_corner_box3d(boxes_center, coordinate='lidar', T_VELO_2_CAM=None, 
         box3d = cornerPosInVelo.transpose()
         ret[i] = box3d
 
-    print(f'bounding box:{ret[0]}')
+    #print(f'bounding box:{ret[0]}')
     # for idx in range(len(ret)):
     #     ret[idx] = lidar_to_camera_point(ret[idx], T_VELO_2_CAM)
 
