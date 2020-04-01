@@ -306,7 +306,7 @@ def center_to_corner_box3d(boxes_center, coordinate='lidar', T_VELO_2_CAM=None, 
         box3d = cornerPosInVelo.transpose()
         ret[i] = box3d
 
-    print(f'bounding box:{ret}')
+    print(f'bounding box:{ret[0]}')
     # for idx in range(len(ret)):
     #     ret[idx] = lidar_to_camera_point(ret[idx], T_VELO_2_CAM)
 
