@@ -447,13 +447,14 @@ def lidar_box3d_to_camera_box(boxes3d, cal_projection=False, P2 = None, T_VELO_2
         points[:, 1] /= points[:, 2]
 
         projections[n] = points[:, 0:2]
-        print(f'projections:{projections}')
         minx = int(np.min(points[:, 0]))
         maxx = int(np.max(points[:, 0]))
         miny = int(np.min(points[:, 1]))
         maxy = int(np.max(points[:, 1]))
 
         boxes2d[n, :] = minx, miny, maxx, maxy
+
+    print(f'projections:{projections}')
 
     return projections if cal_projection else boxes2d
 
