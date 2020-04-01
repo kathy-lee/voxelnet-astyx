@@ -83,7 +83,6 @@ def main():
         strategy = tf.distribute.MirroredStrategy(l)
         print("Using mirrored strategy with gpus.", l)
 
-  print(f'strategy.num_replicas_in_sync:{model.strategy.num_replicas_in_sync}')
 
   ############ Datasets #################################################################
   print("Datasets creation (training dataset, sample_test dataset, validation and dump_test dataset)")
@@ -118,6 +117,7 @@ def main():
   print("Start training : ")
   with strategy.scope():
     model.add_optimizer_(ckpt.epoch)
+    print(f'strategy.num_replicas_in_sync:{model.strategy.num_replicas_in_sync}')
     train_epochs( model, train_batcher, rand_test_batcher, val_batcher,  params, cfg, ckpt, ckpt_manager, strategy)
 
 if __name__ =="__main__":
