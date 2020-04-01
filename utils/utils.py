@@ -454,8 +454,6 @@ def lidar_box3d_to_camera_box(boxes3d, cal_projection=False, P2 = None, T_VELO_2
 
         boxes2d[n, :] = minx, miny, maxx, maxy
 
-    print(f'projections:{projections}')
-
     return projections if cal_projection else boxes2d
 
 
@@ -492,7 +490,7 @@ def draw_lidar_box3d_on_image(img, boxes3d, scores, gt_boxes3d=np.array([]),
     img = img.copy()
     projections = lidar_box3d_to_camera_box(boxes3d, cal_projection=True, P2=P2, T_VELO_2_CAM=T_VELO_2_CAM)
     gt_projections = lidar_box3d_to_camera_box(gt_boxes3d, cal_projection=True, P2=P2, T_VELO_2_CAM=T_VELO_2_CAM)
-
+    print(f'gt_projections:{gt_projections[0]}')
     # draw projections
     for qs in projections:
         for k in range(0, 4):
