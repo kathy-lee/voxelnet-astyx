@@ -293,7 +293,6 @@ def center_to_corner_box3d(boxes_center, coordinate='lidar', T_VELO_2_CAM=None, 
             [h / 2, h / 2, h / 2, h / 2, -h / 2, -h / 2, -h / 2, -h / 2]])
         # rotate and translate 3d bounding box
         if box.shape[0] == 10:
-            print(f'dim:{w},{l},{h}')
             quaternion = box[6:10]
             rotMat = quat_to_rotation(quaternion)
         else:
@@ -616,7 +615,7 @@ def box3d_to_label(tag, batch_box3d, batch_cls, batch_score=[], coordinate='came
     #   label: (N, N') N batches and N lines
     batch_label = []
     calib_dir = "{}/{}/calibration".format(cfg.DATA_DIR, 'validation')
-    _, Tr, _ = load_calib(os.path.join(calib_dir, tag))
+    _, Tr, _ = load_calib(os.path.join(calib_dir, tag + '.json'))
 
     if batch_score:
         template = '{} ' + ' '.join(['{:.4f}' for i in range(15)]) + '\n'
