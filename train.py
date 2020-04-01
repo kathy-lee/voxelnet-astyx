@@ -75,15 +75,16 @@ def main():
       print("Using mirrored strategy with gpus", logical_gpus)
     else:
       l = ["gpu:{}".format(int(i)) for i in params["strategy"].split(",") if i.isdigit()]
-      assert l, "There is no gpus {} available".format(params["strategy"].split(","))
+      assert l, "There is no gpus {} available.".format(params["strategy"].split(","))
       if len(l)==1:
         strategy = tf.distribute.OneDeviceStrategy("gpu:0")
-        print("Using One Device Strategy")
+        print("Using One Device Strategy.")
       else:
         strategy = tf.distribute.MirroredStrategy(l)
-        print("Using mirrored strategy with gpus", l)
+        print("Using mirrored strategy with gpus.", l)
 
-  
+  print(f'strategy.num_replicas_in_sync:{model.strategy.num_replicas_in_sync}')
+
   ############ Datasets #################################################################
   print("Datasets creation (training dataset, sample_test dataset, validation and dump_test dataset)")
   with strategy.scope():

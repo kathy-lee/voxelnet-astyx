@@ -21,7 +21,6 @@ def predict_step(model, batch, anchors, cfg, params, summary=False, vis=False):
 
   res = distributed_predict_step()
   #print('1. finish distributed predict step.')
-  print(f'strategy.num_replicas_in_sync:{model.strategy.num_replicas_in_sync}')
   if model.strategy.num_replicas_in_sync > 1:
     probs, deltas = tf.concat(res[0].values, axis=0).numpy(), tf.concat(res[1].values, axis=0).numpy()
   else:

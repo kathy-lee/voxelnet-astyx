@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import math
 import json
+import os
 
 #from config import cfg
 from utils.box_overlaps import *
@@ -630,8 +631,7 @@ def box3d_to_label(tag, batch_box3d, batch_cls, batch_score=[], coordinate='came
                         box[np.newaxis, :].astype(np.float32), cal_projection=False, P2=P2, T_VELO_2_CAM=T_VELO_2_CAM, R_RECT_0=R_RECT_0)[0]
                 x, y, z, h, w, l, r = box3d
                 box3d = [h, w, l, x, y, z, r]
-                label.append(template.format(
-                    cls, 0, 0, 0, *box2d, *box3d, float(score)))
+                label.append(template.format(cls, 0, 0, 0, *box2d, *box3d, float(score)))
             batch_label.append(label)
     else:
         template = '{} ' + ' '.join(['{:.4f}' for i in range(14)]) + '\n'
