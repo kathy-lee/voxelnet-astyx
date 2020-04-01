@@ -305,7 +305,7 @@ def center_to_corner_box3d(boxes_center, coordinate='lidar', T_VELO_2_CAM=None, 
         cornerPosInVelo = np.dot(rotMat, trackletBox) + np.tile(translation, (8, 1)).T
         box3d = cornerPosInVelo.transpose()
         ret[i] = box3d
-
+        print(f'bounding box:{ret})
     # for idx in range(len(ret)):
     #     ret[idx] = lidar_to_camera_point(ret[idx], T_VELO_2_CAM)
 
@@ -446,6 +446,7 @@ def lidar_box3d_to_camera_box(boxes3d, cal_projection=False, P2 = None, T_VELO_2
         points[:, 1] /= points[:, 2]
 
         projections[n] = points[:, 0:2]
+        print(f'projections:{projections}')
         minx = int(np.min(points[:, 0]))
         maxx = int(np.max(points[:, 0]))
         miny = int(np.min(points[:, 1]))
@@ -599,7 +600,7 @@ def label_to_gt_box3d(labels, cls='Car'):
 
         boxes3d.append(np.array(boxes3d_a_label).reshape(-1, 10))
 
-    #print(f'through label to gt box3d:{len(boxes3d)}')
+    #print(f'through label to gt box3d:{boxes3d}')
     return boxes3d
 
 
