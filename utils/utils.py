@@ -615,7 +615,7 @@ def box3d_to_label(tag, batch_box3d, batch_cls, batch_score=[], coordinate='came
     #   label: (N, N') N batches and N lines
     batch_label = []
     calib_dir = "{}/{}/calibration".format(cfg.DATA_DIR, 'validation')
-    _, T_VELO_2_CAM, _ = load_calib(os.path.join(calib_dir, tag + '.json'))
+    _, Tr, P = load_calib(os.path.join(calib_dir, tag + '.json'))
     R_RECT_0 = cfg.MATRIX_R_RECT_0
 
     if batch_score:
@@ -629,9 +629,9 @@ def box3d_to_label(tag, batch_box3d, batch_cls, batch_score=[], coordinate='came
                         camera_to_lidar_box(box[np.newaxis, :].astype(np.float32), T_VELO_2_CAM, R_RECT_0), cal_projection=False, P2=P2, T_VELO_2_CAM=T_VELO_2_CAM, R_RECT_0=R_RECT_0)[0]
                 else:
                     box3d = lidar_to_camera_box(
-                        box[np.newaxis, :].astype(np.float32), T_VELO_2_CAM, R_RECT_0)[0]
+                        box[np.newaxis, :].astype(np.float32), Tr, R_RECT_0)[0]
                     box2d = lidar_box3d_to_camera_box(
-                        box[np.newaxis, :].astype(np.float32), cal_projection=False, P2=P2, T_VELO_2_CAM=T_VELO_2_CAM, R_RECT_0=R_RECT_0)[0]
+                        box[np.newaxis, :].astype(np.float32), cal_projection=False, P2=P, T_VELO_2_CAM=Tr)[0]
                 x, y, z, h, w, l, r = box3d
                 box3d = [h, w, l, x, y, z, r]
                 label.append(template.format(cls, 0, 0, 0, *box2d, *box3d, float(score)))
