@@ -204,9 +204,10 @@ def lidar_to_camera(x, y, z, T_VELO_2_CAM=None, R_RECT_0=None):
         R_RECT_0 = np.array(cfg.MATRIX_R_RECT_0)
 
     p = np.array([x, y, z, 1])
+    print(f'T:{T_VELO_2_CAM.shape},p:{p.shape},R:{R_RECT_0.shape}')
     p = np.matmul(T_VELO_2_CAM, p)
-    p = np.matmul(R_RECT_0, p)
-    p = p[0:3]
+    #p = np.matmul(R_RECT_0, p)
+    #p = p[0:3]
     return tuple(p)
 
 
