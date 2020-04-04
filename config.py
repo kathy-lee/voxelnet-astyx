@@ -88,6 +88,12 @@ __cfg__.VFE_FINAl_OUT_DIM = 128
 #     [0, 0, 0, 1]
 # ])
 
+__cfg__.MATRIX_R_RECT_0 = ([
+    [1, 0, 0, 0],
+    [0, 1, 0, 0],
+    [0, 0, 1, 0],
+    [0, 0, 0, 1]
+])
 
 # Faster-RCNN/SSD Hyper params
 if __cfg__.DETECT_OBJECT == 'Car':

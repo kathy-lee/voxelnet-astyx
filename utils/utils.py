@@ -615,7 +615,8 @@ def box3d_to_label(tag, batch_box3d, batch_cls, batch_score=[], coordinate='came
     #   label: (N, N') N batches and N lines
     batch_label = []
     calib_dir = "{}/{}/calibration".format(cfg.DATA_DIR, 'validation')
-    _, Tr, _ = load_calib(os.path.join(calib_dir, tag + '.json'))
+    _, T_VELO_2_CAM, _ = load_calib(os.path.join(calib_dir, tag + '.json'))
+    R_RECT_0 = cfg.MATRIX_R_RECT_0
 
     if batch_score:
         template = '{} ' + ' '.join(['{:.4f}' for i in range(15)]) + '\n'
