@@ -98,7 +98,7 @@ def predict_step(model, batch, anchors, cfg, params, summary=False, vis=False):
       P, Tr, R = load_calib( os.path.join( cfg.CALIB_DIR, cur_tag + '.json' ) )
               
       front_image = draw_lidar_box3d_on_image(img[i], ret_box3d[i], ret_score[i],
-                                        batch_gt_boxes3d[i], P2=P, T_VELO_2_CAM=Tr, R_RECT_0=R)
+                                        batch_gt_boxes3d[i], P2=P, T_VELO_2_CAM=Tr)
                                         
       bird_view = lidar_to_bird_view_img(lidar, factor=cfg.BV_LOG_FACTOR)
                                         
