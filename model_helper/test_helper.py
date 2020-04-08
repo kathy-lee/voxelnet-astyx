@@ -95,7 +95,7 @@ def predict_step(model, batch, anchors, cfg, params, summary=False, vis=False):
       cur_tag = tag[i]
       n_points = batch["num_points"][i].numpy()
       lidar = batch["lidar"][i][0:n_points,].numpy()
-      P, Tr, R = load_calib( os.path.join( cfg.CALIB_DIR, cur_tag + '.txt' ) )
+      P, Tr, R = load_calib( os.path.join( cfg.CALIB_DIR, cur_tag + '.json' ) )
               
       front_image = draw_lidar_box3d_on_image(img[i], ret_box3d[i], ret_score[i],
                                         batch_gt_boxes3d[i], P2=P, T_VELO_2_CAM=Tr, R_RECT_0=R)
