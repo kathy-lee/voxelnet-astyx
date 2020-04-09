@@ -649,10 +649,12 @@ def box3d_to_label(tag, batch_box3d, batch_cls, batch_score=[], coordinate='came
                     box3d = lidar_to_camera_box(
                         box[np.newaxis, :].astype(np.float32), T_VELO_2_CAM, R_RECT_0)[0]
                     box2d = lidar_box3d_to_camera_box(
-                        box[np.newaxis, :].astype(np.float32), cal_projection=False, P2=P2, T_VELO_2_CAM=T_VELO_2_CAM, R_RECT_0=R_RECT_0)[0]
-                x, y, z, h, w, l, r = box3d
-                box3d = [h, w, l, x, y, z, r]
-                label.append(template.format(cls, 0, 0, 0, *box2d, *box3d))
+                        box[np.newaxis, :].astype(np.float32), cal_projection=False, P2=P2, T_VELO_2_CAM=T_VELO_2_CAM)[0]
+                # x, y, z, h, w, l, r = box3d
+                # box3d = [h, w, l, x, y, z, r]
+                # label.append(template.format(cls, 0, 0, 0, *box2d, *box3d))
+                label = np.concatenate([box3d, cls], axis=-1)
+                print(f'label in data aug: {label.shape}')
             batch_label.append(label)
 
     return np.array(batch_label)

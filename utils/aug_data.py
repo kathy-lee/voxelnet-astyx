@@ -17,6 +17,7 @@ def aug_data(tag, object_dir):
     #     object_dir, 'groundtruth_obj3d', tag + '.json'), 'r').readlines()])  # (N')
     label = load_label( os.path.join(object_dir, 'groundtruth_obj3d', tag + '.json') )
     #cls = np.array([line[10] for line in label])  # (N')
+    cls = label[:,10]
     gt_box3d = label_to_gt_box3d(label[np.newaxis, :], cls='')[0]  # (N', 7) x, y, z, h, w, l, r
 
     choice = np.random.randint(0, 10)
@@ -72,27 +73,25 @@ def aug_data(tag, object_dir):
         newtag = 'aug_{}_1_{}'.format(
             tag, np.random.randint(1, 1024))
     elif choice <4:
-      pass
+        pass
     elif choice < 7 and choice >= 4:
-      pass
-        # # global rotation
-        # angle = np.random.uniform(-np.pi / 4, np.pi / 4)
-        # lidar[:, 0:3] = point_transform(lidar[:, 0:3], 0, 0, 0, rz=angle)
-        # #lidar_center_gt_box3d = camera_to_lidar_box(gt_box3d)
-        # gt_box3d = box_transform(gt_box3d, 0, 0, 0, r=angle, coordinate='lidar')
-        # #gt_box3d = lidar_to_camera_box(lidar_center_gt_box3d)
-        # newtag = 'aug_{}_2_{:.4f}'.format(tag, angle).replace('.', '_')
+        # global rotation
+        angle = np.random.uniform(-np.pi / 4, np.pi / 4)
+        lidar[:, 0:3] = point_transform(lidar[:, 0:3], 0, 0, 0, rz=angle)
+        #lidar_center_gt_box3d = camera_to_lidar_box(gt_box3d)
+        gt_box3d = box_transform(gt_box3d, 0, 0, 0, r=angle, coordinate='lidar')
+        #gt_box3d = lidar_to_camera_box(lidar_center_gt_box3d)
+        newtag = 'aug_{}_2_{:.4f}'.format(tag, angle).replace('.', '_')
     else:
-      pass
-        # # global scaling
-        # factor = np.random.uniform(0.95, 1.05)
-        # lidar[:, 0:3] = lidar[:, 0:3] * factor
-        # #lidar_center_gt_box3d = camera_to_lidar_box(gt_box3d)
-        # gt_box3d[:, 0:6] = gt_box3d[:, 0:6] * factor
-        # #gt_box3d = lidar_to_camera_box(lidar_center_gt_box3d)
-        # newtag = 'aug_{}_3_{:.4f}'.format(tag, factor).replace('.', '_')
+        # global scaling
+        factor = np.random.uniform(0.95, 1.05)
+        lidar[:, 0:3] = lidar[:, 0:3] * factor
+        #lidar_center_gt_box3d = camera_to_lidar_box(gt_box3d)
+        gt_box3d[:, 0:6] = gt_box3d[:, 0:6] * factor
+        #gt_box3d = lidar_to_camera_box(lidar_center_gt_box3d)
+        newtag = 'aug_{}_3_{:.4f}'.format(tag, factor).replace('.', '_')
 
-    #label = box3d_to_label(gt_box3d[np.newaxis, ...], cls[np.newaxis, ...], coordinate='camera')[0]  # (N')
+    label = box3d_to_label(tag, gt_box3d[np.newaxis, ...], cls[np.newaxis, ...], coordinate='camera')[0]  # (N')
     voxel_dict = process_pointcloud(lidar, cfg)
     dic = {}
     dic["img"] = 0
