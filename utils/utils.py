@@ -112,10 +112,26 @@ def qaut_to_angle(quat):
     y=quat[2]
     z=quat[3]
 
-    rol = math.atan2(2*(w*x+y*z),1-2*(x*x+y*y))#the rol is the yaw angle!
-    pith = math.asin(2*(w*y-x*z))
+    roll = math.atan2(2*(w*x+y*z),1-2*(x*x+y*y))#the rol is the yaw angle!
+    pitch = math.asin(2*(w*y-x*z))
     yaw = math.atan2(2*(w*z+x*y),1-2*(z*z+y*y))
-    return yaw
+    return roll, pitch, yaw
+
+def angle_to_quat(roll, pitch, yaw):
+    cy = cos(yaw * 0.5)
+    sy = sin(yaw * 0.5)
+    cp = cos(pitch * 0.5)
+    sp = sin(pitch * 0.5)
+    cr = cos(roll * 0.5)
+    sr = sin(roll * 0.5)
+
+    q = np.zeros(4)
+    q[0] = cr * cp * cy + sr * sp * sy
+    q[1] = sr * cp * cy - cr * sp * sy
+    q[2] = cr * sp * cy + sr * cp * sy
+    q[3] = cr * cp * sy - sr * sp * cy
+
+    return q
 
 #-- util function to load calib matrices
 def load_calib(calib_dir):
@@ -355,7 +371,7 @@ def anchor_to_standup_box2d(anchors):
 
 
 def corner_to_center_box3d(boxes_corner, coordinate='camera', T_VELO_2_CAM=None, R_RECT_0=None):
-    # (N, 8, 3) -> (N, 10) x,y,z,h,w,l,ry/z
+    # (N, 8, 3) -> (N, 10) x,y,z,h,w,l,q0-q3
 
     # if coordinate == 'lidar':
     #     for idx in range(len(boxes_corner)):
@@ -779,7 +795,7 @@ def gt_boxes3d_to_yaw(batch_boxes):
 
             quaternion = box[6:10]
             #print(f'quaternion: {quaternion.shape}')
-            yaw = qaut_to_angle(quaternion)
+            _, _, yaw = qaut_to_angle(quaternion)
 
 
             box_yaw = np.hstack((box[0:6], yaw))
@@ -962,6 +978,7 @@ def box_transform(boxes, tx, ty, tz, r=0, coordinate='lidar'):
     #   boxes: (N, 10) x y z h w l q0-3
     # Output:
     #   boxes: (N, 10) x y z h w l q0-3
+
     boxes_corner = center_to_corner_box3d(boxes, coordinate=coordinate)  # (N, 8, 3)
     for idx in range(len(boxes_corner)):
         if coordinate == 'lidar':
@@ -973,6 +990,12 @@ def box_transform(boxes, tx, ty, tz, r=0, coordinate='lidar'):
 
     return corner_to_center_box3d(boxes_corner, coordinate=coordinate)
 
+def rotate_label(label, ang):
+    quaternion = label[6:10]
+    roll, pitch, yaw = qaut_to_angle(quaternion)
+    rot_quaternion = angle_to_quat(roll, pitch, yaw-ang)
+    label[6:10] = rot_quaternion
+    return label
 
 def cal_iou2d(box1, box2, T_VELO_2_CAM=None, R_RECT_0=None):
     # Input: 

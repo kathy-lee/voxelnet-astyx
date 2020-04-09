@@ -79,8 +79,9 @@ def aug_data(tag, object_dir):
         angle = np.random.uniform(-np.pi / 4, np.pi / 4)
         lidar[:, 0:3] = point_transform(lidar[:, 0:3], 0, 0, 0, rz=angle)
         #lidar_center_gt_box3d = camera_to_lidar_box(gt_box3d)
-        gt_box3d = box_transform(gt_box3d, 0, 0, 0, r=angle, coordinate='lidar')
+        #gt_box3d = box_transform(gt_box3d, 0, 0, 0, r=angle )
         #gt_box3d = lidar_to_camera_box(lidar_center_gt_box3d)
+        label = rotate_label(label,angle)
         newtag = 'aug_{}_2_{:.4f}'.format(tag, angle).replace('.', '_')
     else:
         # global scaling
@@ -89,9 +90,10 @@ def aug_data(tag, object_dir):
         #lidar_center_gt_box3d = camera_to_lidar_box(gt_box3d)
         gt_box3d[:, 0:6] = gt_box3d[:, 0:6] * factor
         #gt_box3d = lidar_to_camera_box(lidar_center_gt_box3d)
+        label[0:6] = label[0:6] * factor
         newtag = 'aug_{}_3_{:.4f}'.format(tag, factor).replace('.', '_')
 
-    label = box3d_to_label(tag, gt_box3d[np.newaxis, ...], cls[np.newaxis, ...], coordinate='camera')[0]  # (N')
+    #label = box3d_to_label(tag, gt_box3d[np.newaxis, ...], cls[np.newaxis, ...], coordinate='camera')[0]  # (N')
     voxel_dict = process_pointcloud(lidar, cfg)
     dic = {}
     dic["img"] = 0
