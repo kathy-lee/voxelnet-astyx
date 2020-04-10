@@ -118,12 +118,12 @@ def qaut_to_angle(quat):
     return roll, pitch, yaw
 
 def angle_to_quat(roll, pitch, yaw):
-    cy = cos(yaw * 0.5)
-    sy = sin(yaw * 0.5)
-    cp = cos(pitch * 0.5)
-    sp = sin(pitch * 0.5)
-    cr = cos(roll * 0.5)
-    sr = sin(roll * 0.5)
+    cy = math.cos(yaw * 0.5)
+    sy = math.sin(yaw * 0.5)
+    cp = math.cos(pitch * 0.5)
+    sp = math.sin(pitch * 0.5)
+    cr = math.cos(roll * 0.5)
+    sr = math.sin(roll * 0.5)
 
     q = np.zeros(4)
     q[0] = cr * cp * cy + sr * sp * sy
