@@ -81,7 +81,8 @@ def aug_data(tag, object_dir):
         #lidar_center_gt_box3d = camera_to_lidar_box(gt_box3d)
         #gt_box3d = box_transform(gt_box3d, 0, 0, 0, r=angle )
         #gt_box3d = lidar_to_camera_box(lidar_center_gt_box3d)
-        label = rotate_label(label,angle)
+        print(f'label:{label.shape}')
+        label = rotate_label(label, angle)
         newtag = 'aug_{}_2_{:.4f}'.format(tag, angle).replace('.', '_')
     else:
         # global scaling
