@@ -991,10 +991,12 @@ def box_transform(boxes, tx, ty, tz, r=0, coordinate='lidar'):
     return corner_to_center_box3d(boxes_corner, coordinate=coordinate)
 
 def rotate_label(label, ang):
-    quaternion = label[6:10]
-    roll, pitch, yaw = qaut_to_angle(quaternion)
-    rot_quaternion = angle_to_quat(roll, pitch, yaw-ang)
-    label[6:10] = rot_quaternion
+
+    for i,row in enumerate(label):
+      quaternion = row[6:10]
+      roll, pitch, yaw = qaut_to_angle(quaternion)
+      rot_quaternion = angle_to_quat(roll, pitch, yaw-ang)
+      row[6:10] = rot_quaternion
     return label
 
 def cal_iou2d(box1, box2, T_VELO_2_CAM=None, R_RECT_0=None):
