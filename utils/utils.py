@@ -448,7 +448,7 @@ def corner_to_center_box3d(boxes_corner, coordinate='camera', T_VELO_2_CAM=None,
 
 # this just for visualize and testing
 def lidar_box3d_to_camera_box(boxes3d, cal_projection=False, P2 = None, T_VELO_2_CAM=None):
-    # (N, 10) -> (N, 4)/(N, 8, 2)  x,y,z,h,w,l,q0-q3 -> x1,y1,x2,y2/8*(x, y)
+    # (N, 10) or (N,7) -> (N, 4)/(N, 8, 2)  x,y,z,h,w,l,q0-q3 -> x1,y1,x2,y2/8*(x, y)
     num = len(boxes3d)
     boxes2d = np.zeros((num, 4), dtype=np.int32)
     projections = np.zeros((num, 8, 2), dtype=np.float32)
@@ -500,9 +500,9 @@ def draw_lidar_box3d_on_image(img, boxes3d, scores, gt_boxes3d=np.array([]),
                               color=(0, 255, 255), gt_color=(255, 0, 255), thickness=1, P2 = None, T_VELO_2_CAM=None):
     # Input:
     #   img: (h, w, 3)
-    #   boxes3d (N, 10) [x, y, z, h, w, l, q0-q3]
+    #   boxes3d (N, 7) [x, y, z, h, w, l, r]
     #   scores
-    #   gt_boxes3d (N, 7) [x, y, z, h, w, l, q0-q3]
+    #   gt_boxes3d (N, 10) [x, y, z, h, w, l, q0-q3]
     img = img.copy()
     print(f'predicted boxes3d:{boxes3d.shape},ground truth boxes3d:{gt_boxes3d.shape}')
     projections = lidar_box3d_to_camera_box(boxes3d, cal_projection=True, P2=P2, T_VELO_2_CAM=T_VELO_2_CAM)
@@ -991,13 +991,39 @@ def box_transform(boxes, tx, ty, tz, r=0, coordinate='lidar'):
 
     return corner_to_center_box3d(boxes_corner, coordinate=coordinate)
 
-def rotate_label(label, ang):
+def rotate_label(label, rx=0, ry=0, rz=0):
+
+    if rx != 0:
+        mat = np.zeros((3, 3))
+        mat[0, 0] = 1
+        mat[1, 1] = np.cos(rx)
+        mat[1, 2] = -np.sin(rx)
+        mat[2, 1] = np.sin(rx)
+        mat[2, 2] = np.cos(rx)
+
+    if ry != 0:
+        mat = np.zeros((3, 3))
+        mat[1, 1] = 1
+        mat[0, 0] = np.cos(ry)
+        mat[0, 2] = np.sin(ry)
+        mat[2, 0] = -np.sin(ry)
+        mat[2, 2] = np.cos(ry)
+
+    if rz != 0:
+        mat = np.zeros((3, 3))
+        mat[2, 2] = 1
+        mat[0, 0] = np.cos(rz)
+        mat[0, 1] = -np.sin(rz)
+        mat[1, 0] = np.sin(rz)
+        mat[1, 1] = np.cos(rz)
 
     for i,row in enumerate(label):
+      translation = row[0:3]
       quaternion = row[6:10]
       roll, pitch, yaw = qaut_to_angle(quaternion)
-      rot_quaternion = angle_to_quat(roll, pitch, yaw-ang)
+      rot_quaternion = angle_to_quat(roll, pitch, yaw-rz)
       row[6:10] = rot_quaternion
+      row[0:3] = np.matmul(translation, mat)
     return label
 
 def cal_iou2d(box1, box2, T_VELO_2_CAM=None, R_RECT_0=None):
