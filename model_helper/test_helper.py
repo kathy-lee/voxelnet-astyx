@@ -91,7 +91,6 @@ def predict_step(model, batch, anchors, cfg, params, summary=False, vis=False):
 
   if vis:
     front_images, bird_views, heatmaps = [], [], []
-    print(f'len(img):{len(img)}')
     for i in range(len(img)):
       cur_tag = tag[i]
       n_points = batch["num_points"][i].numpy()

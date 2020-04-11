@@ -504,6 +504,7 @@ def draw_lidar_box3d_on_image(img, boxes3d, scores, gt_boxes3d=np.array([]),
     #   scores
     #   gt_boxes3d (N, 7) [x, y, z, h, w, l, q0-q3]
     img = img.copy()
+    print(f'boxes3d:{len(boxes3d)},gt_boxes3d:{gt_boxes3d.shape}')
     projections = lidar_box3d_to_camera_box(boxes3d, cal_projection=True, P2=P2, T_VELO_2_CAM=T_VELO_2_CAM)
     #print('begin to draw ground truth box.')
     gt_projections = lidar_box3d_to_camera_box(gt_boxes3d, cal_projection=True, P2=P2, T_VELO_2_CAM=T_VELO_2_CAM)
