@@ -76,11 +76,11 @@ class Data_helper:
       sorted(self.tags)
     for index in self.tags:
       #index = next(self.tag_gen)
-      print(f'begin fill examples queue: index:{index}.',end = '')
+      #print(f'begin fill examples queue: index:{index}.',end = '')
       dic = {}
       if is_aug_data:
         dic = aug_data(index, os.path.join(cfg.DATA_DIR, data_d))
-        print('finish data augumentation.', end = '')
+        #print('finish data augumentation.', end = '')
       else:
         pc = np.fromfile("%s/%06d.bin" % (pc_dir, int(index)), dtype=np.float32).reshape(-1,4) 
         if mode == "test":
@@ -117,7 +117,7 @@ class Data_helper:
                                                                                       self.anchors, 
                                                                                       cfg.DETECT_OBJECT, 
                                                                                       'lidar')
-        print('finish rpn calculation.', end = '')
+        #print('finish rpn calculation.', end = '')
 
         dic["pos_equal_one_reg"] = np.concatenate(
                 [np.tile( dic["pos_equal_one"][..., [0]], 7), np.tile( dic["pos_equal_one"][..., [1]], 7)], axis=-1)[0] #we index to 0 because we added a batch dimension
@@ -131,7 +131,7 @@ class Data_helper:
         dic["pos_equal_one"], dic["neg_equal_one"], dic["targets"] = 0,0,0
         dic["pos_equal_one_reg"], dic["pos_equal_one_sum"], dic["neg_equal_one_sum"] = 0,0,0
 
-      print('finish one time fill queqe. yielded dic.')
+      #print('finish one time fill queqe. yielded dic.')
       # print(f'labels: {dic["labels"].shape}')
       # print(f'tag: {dic["tag"]}')
       # print(f'feature_buffer: {dic["feature_buffer"].shape}')

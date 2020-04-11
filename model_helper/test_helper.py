@@ -51,7 +51,7 @@ def predict_step(model, batch, anchors, cfg, params, summary=False, vis=False):
     #print('4. finish non max suppression.')
 
   ret_box3d_score = []
-  print(f'ret_box3d:{len(ret_box3d)}, ret_score:{len(ret_score)}')
+  #print(f'ret_box3d:{len(ret_box3d)}, ret_score:{len(ret_score)}')
   for boxes3d, scores in zip(ret_box3d, ret_score):
     ret_box3d_score.append(np.concatenate(
         [
@@ -75,7 +75,7 @@ def predict_step(model, batch, anchors, cfg, params, summary=False, vis=False):
 
     front_image = draw_lidar_box3d_on_image(img[0], ret_box3d[0], ret_score[0],
                                                   batch_gt_boxes3d[0], P2=P, T_VELO_2_CAM=Tr)
-    print('finish drawing prediction on image.')
+    #print('finish drawing prediction on image.')
 
     n_points = batch["num_points"][0].numpy()
     lidar = batch["lidar"][0][0:n_points,].numpy()

@@ -59,15 +59,15 @@ def train_epochs( model, train_batcher, rand_test_batcher, val_batcher,  params,
                                                             batch["pos_equal_one_sum"],
                                                             batch["neg_equal_one"], 
                                                             batch["neg_equal_one_sum"]))
-    print('finish experimental_run_v2.')
+    #print('finish experimental_run_v2.')
     return [strategy.reduce(tf.distribute.ReduceOp.SUM, per_replica_loss,
                           axis=None) for per_replica_loss in per_replica_losses]
 
   @tf.function
   def distributed_validate_step():
-    print('start dis vali step.')
+    #print('start dis vali step.')
     batch = next(rand_test_batcher)
-    print(f'dis vali step. batch:{batch}')
+    #print(f'dis vali step. batch:{batch}')
     per_replica_losses = strategy.run(model.train_step,
                                                     args=(batch["feature_buffer"], 
                                                           batch["coordinate_buffer"],
@@ -114,11 +114,11 @@ def train_epochs( model, train_batcher, rand_test_batcher, val_batcher,  params,
         global_step = ckpt.step.numpy()
         tf.summary.experimental.set_step(global_step)
 
-        print('begin distributed train step:')
+        #print('begin distributed train step:')
         t0 = time.time()
         losses = distributed_train_step()
         t1 = time.time() - t0
-        print('finish distributed train step, result:')
+        #print('finish distributed train step, result:')
 
         print('train: {} @ epoch:{}/{} global_step:{} loss: {} reg_loss: {} cls_loss: {} cls_pos_loss: {} cls_neg_loss: {} batch time: {:.4f}'.format(step+1, epoch.numpy(), params["n_epochs"], ckpt.step.numpy(), colored('{:.4f}'.format(losses[0]), "red"), colored('{:.4f}'.format(losses[1]), "magenta"), colored('{:.4f}'.format(losses[2]), "yellow"), colored('{:.4f}'.format(losses[3]), "blue"), colored('{:.4f}'.format(losses[4]), "cyan"),  t1))
         with open('{}/train.txt'.format(logdir), 'a') as f:

@@ -504,7 +504,7 @@ def draw_lidar_box3d_on_image(img, boxes3d, scores, gt_boxes3d=np.array([]),
     #   scores
     #   gt_boxes3d (N, 10) [x, y, z, h, w, l, q0-q3]
     img = img.copy()
-    print(f'predicted boxes3d:{boxes3d.shape},ground truth boxes3d:{gt_boxes3d.shape}')
+    #print(f'predicted boxes3d:{boxes3d.shape},ground truth boxes3d:{gt_boxes3d.shape}')
     projections = lidar_box3d_to_camera_box(boxes3d, cal_projection=True, P2=P2, T_VELO_2_CAM=T_VELO_2_CAM)
     #print('begin to draw ground truth box.')
     gt_projections = lidar_box3d_to_camera_box(gt_boxes3d, cal_projection=True, P2=P2, T_VELO_2_CAM=T_VELO_2_CAM)
@@ -671,7 +671,7 @@ def box3d_to_label(tag, batch_box3d, batch_cls, batch_score=[], coordinate='came
                 # box3d = [h, w, l, x, y, z, r]
                 # label.append(template.format(cls, 0, 0, 0, *box2d, *box3d))
                 label = np.concatenate([box3d, cls], axis=-1)
-                print(f'label in data aug: {label.shape}')
+                #print(f'label in data aug: {label.shape}')
             batch_label.append(label)
 
     return np.array(batch_label)
@@ -753,33 +753,33 @@ def mat_to_ang(R):
 def gt_boxes3d_to_yaw(batch_boxes, T_VELO_2_CAM):
     # Input: (N, N', 10)
     # Output: (N, N', 7)
-    print(f'prepare to convert into yaw:{len(batch_boxes)}')
+    #print(f'prepare to convert into yaw:{len(batch_boxes)}')
     batch_boxes_yaw = []
     for boxes in batch_boxes:
         boxes_yaw = []
-        print(f'boxes:{boxes}')
+        #print(f'boxes:{boxes}')
         for box in boxes:
-            print(f'box:{box.shape},{box}')
+            #print(f'box:{box.shape},{box}')
             center_point = np.insert(box[0:3], 3, values=1)
-            print(f'center point shape:{center_point.shape},{center_point}')
+            #print(f'center point shape:{center_point.shape},{center_point}')
             center_point = np.matmul(T_VELO_2_CAM, center_point)
-            print(f'center point shape:{center_point.shape}')
+            #(f'center point shape:{center_point.shape}')
 
             quaternion = box[6:10]
-            print(f'quaternion: {quaternion.shape}, {quaternion}')
+            #print(f'quaternion: {quaternion.shape}, {quaternion}')
             rotation_mat = quat_to_mat(quaternion)
             rotation_mat = np.matmul(T_VELO_2_CAM[:,:3], rotation_mat)
             yaw = mat_to_ang(rotation_mat)
 
 
             box_yaw = np.hstack((center_point, box[3:6], yaw))
-            print(f'len of new box in yaw:{box_yaw.shape}')
+            #print(f'len of new box in yaw:{box_yaw.shape}')
             boxes_yaw.append(box_yaw)
 
-        print(f'boxes:{len(boxes_yaw)}')
+        #print(f'boxes:{len(boxes_yaw)}')
         batch_boxes_yaw.append(np.array(boxes_yaw).reshape(-1, 7))
 
-    print(f'result batch boxes in yaw:{len(batch_boxes_yaw)}')
+    #print(f'result batch boxes in yaw:{len(batch_boxes_yaw)}')
 
     return batch_boxes_yaw
 
