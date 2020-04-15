@@ -196,3 +196,5 @@ def train_epochs( model, train_batcher, rand_test_batcher, val_batcher,  params,
     ckpt_manager.save(checkpoint_number=ckpt.step.numpy())
     print("Saved checkpoint for step {}".format(ckpt.step.numpy()))
     summary_writer.flush()
+  except Exception as e:
+    print(f"Unexpected exception happened: {str(e)}")
