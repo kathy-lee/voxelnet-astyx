@@ -182,6 +182,7 @@ def train_epochs( model, train_batcher, rand_test_batcher, val_batcher,  params,
               cv2.imwrite( front_img_path, front_image )
               cv2.imwrite( bird_view_path, bird_view )
               cv2.imwrite( heatmap_path, heatmap )
+              print('write out 3 (front image, bird view and heatmap) jpegs to {}'.format(tag))
           
         
         # execute evaluation code
