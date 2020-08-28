@@ -1,9 +1,8 @@
 # Voxelnet for astyx data with tensorflow2.1.0
 
-Implementation of [VoxelNet: End-to-End Learning for Point Cloud Based 3D Object Detection](https://arxiv.org/abs/1711.06396) in tensorflow 2.0.0. <br>
+Implementation of [VoxelNet: End-to-End Learning for Point Cloud Based 3D Object Detection](https://arxiv.org/abs/1711.06396) for Astyx radar data in tensorflow 2.0.0. It can run directly on Astyx automotive dataset without converting to kitti format. <br>
 This project is based on the work of [Voxelnet by Steph1793](https://github.com/steph1793/Voxelnet). Thanks to the tremendous work.
 
-It can run directly on astyx automotive dataset without converting to kitti format.
 
 # Dependencies
 * Python 3.6
